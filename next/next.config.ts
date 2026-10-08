@@ -20,6 +20,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "irsa.ipac.caltech.edu",
       },
+      {
+        protocol: "https",
+        hostname: "assets.spaceappschallenge.org",
+      },
     ],
   },
 };

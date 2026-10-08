@@ -2,26 +2,35 @@
   "team": "A-JINX",
   "challenge": "Planet X and SPHEREx",
   "location": "Barisal, Bangladesh",
+  "pageUrl": "https://www.spaceappschallenge.org/2026/find-a-team/a-jinx/",
   "members": [
     {
       "name": "MD. JIBON HOWLADER",
       "username": "programmerjibon",
-      "country": "Bangladesh"
+      "country": "Bangladesh",
+      "image": "https://assets.spaceappschallenge.org/media/images/20250919_081011510_300x300.2e16d0ba.fill-64x64.jpg",
+      "role": "Lead Engineer & Researchers"
     },
     {
       "name": "Asfack Ahamed Siam",
       "username": "asfack_ahamed",
-      "country": "Bangladesh"
+      "country": "Bangladesh",
+      "image": "https://assets.spaceappschallenge.org/media/images/inbound1133248441876672487.2e16d0ba.fill-64x64.png",
+      "role": "Architecture & Design"
     },
     {
       "name": "MD. Fahim Ahmed",
       "username": "mihafyor",
-      "country": "Bangladesh"
+      "country": "Bangladesh",
+      "image": "https://assets.spaceappschallenge.org/media/images/inbound701416982342212040.2e16d0ba.fill-64x64.png",
+      "role": "Data Scientist & Researcher"
     },
     {
       "name": "Turjo Roy",
       "username": "turjo12345",
-      "country": "Bangladesh"
+      "country": "Bangladesh",
+      "image": "https://assets.spaceappschallenge.org/media/images/1000374472_U6q3oAI.2e16d0ba.fill-64x64.jpg",
+      "role": "Data Scientist & Researcher"
     }
   ]
 }
