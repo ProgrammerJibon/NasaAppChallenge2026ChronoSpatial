@@ -7,14 +7,17 @@ from scipy.ndimage import map_coordinates
 from .fits import ImagePlane
 
 def safe_world_to_pixel(wcs, ra, dec):
-    try:
-        return wcs.world_to_pixel_values(ra, dec)
-    except NoConvergence as e:
-        x, y = e.best_solution[..., 0], e.best_solution[..., 1]
-        if hasattr(e, "divergent") and e.divergent is not None:
-            x[e.divergent] = np.nan
-            y[e.divergent] = np.nan
-        return x, y
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        try:
+            return wcs.world_to_pixel_values(ra, dec)
+        except NoConvergence as e:
+            x, y = e.best_solution[..., 0], e.best_solution[..., 1]
+            if hasattr(e, "divergent") and e.divergent is not None:
+                x[e.divergent] = np.nan
+                y[e.divergent] = np.nan
+            return x, y
 
 def reproject_to(source: ImagePlane, target: ImagePlane):
     yy, xx = np.indices(target.image.shape)

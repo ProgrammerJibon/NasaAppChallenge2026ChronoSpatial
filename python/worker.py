@@ -104,6 +104,16 @@ def run_job(conn, job):
                WHERE id = %s""",
             (str(e), job_id),
         )
+        if job_type == "COMPARE_EPOCHS" and isinstance(payload, dict) and "comparisonId" in payload:
+            execute(
+                conn,
+                """UPDATE comparisons
+                   SET status = 'failed',
+                       summary_json = %s,
+                       completed_at = UTC_TIMESTAMP(3)
+                   WHERE id = %s""",
+                (encode_json({"error": str(e)}), payload["comparisonId"]),
+            )
         return False
 
 def worker_loop(max_iterations: int | None = None, poll_interval: float = 2.0):
