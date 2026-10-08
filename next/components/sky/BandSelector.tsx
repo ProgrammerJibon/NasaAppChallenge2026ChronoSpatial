@@ -2,6 +2,7 @@
 
 import React from "react";
 import { SPHEREX_DETECTORS } from "@/lib/constants";
+import { useLanguage } from "@/lib/i18n";
 
 export interface BandSelectorProps {
   selectedBand: number | null;
@@ -12,6 +13,7 @@ export function BandSelector({
   selectedBand,
   onSelectBand,
 }: BandSelectorProps) {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       <button
@@ -23,7 +25,7 @@ export function BandSelector({
             : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200"
         }`}
       >
-        All Bands
+        {t("allBands")}
       </button>
 
       {SPHEREX_DETECTORS.map((b) => {

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { REVIEW_CLASSIFICATIONS } from "@/lib/constants";
 import { Button } from "@/components/ui/Button";
+import { useLanguage } from "@/lib/i18n";
 import { RiCheckLine, RiArrowRightLine } from "react-icons/ri";
 
 export interface ReviewActionsProps {
@@ -16,9 +17,25 @@ export function ReviewActions({
   onNext,
   submitting = false,
 }: ReviewActionsProps) {
+  const { t } = useLanguage();
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number>(0.9);
   const [submitted, setSubmitted] = useState<boolean>(false);
+
+  const getClassLabel = (c: string) => {
+    switch (c) {
+      case "Moving object":
+        return t("movingObject");
+      case "Brightness changed":
+        return t("variableStar");
+      case "Appeared/disappeared":
+        return t("transient");
+      case "Likely artefact/noise":
+        return t("artifact");
+      default:
+        return c;
+    }
+  };
 
   const handleSubmit = async () => {
     if (!selectedClass) return;
@@ -36,7 +53,7 @@ export function ReviewActions({
     <div className="flex flex-col gap-5 p-6 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl">
       <div>
         <h4 className="text-sm font-semibold text-white mb-1">
-          Classify this Change
+          {t("classifyAs")}
         </h4>
         <p className="text-xs text-slate-400">
           Does this candidate appear to move, change flux, or look like detector noise?
@@ -59,7 +76,7 @@ export function ReviewActions({
                   : "bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-850"
               }`}
             >
-              {c}
+              {getClassLabel(c)}
             </button>
           );
         })}
@@ -68,7 +85,7 @@ export function ReviewActions({
       {/* Confidence Slider */}
       <div className="space-y-1.5 pt-2">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-400">Confidence Level:</span>
+          <span className="text-slate-400">{t("confidenceLabel")}:</span>
           <span className="font-mono text-sky-400 font-semibold">
             {(confidence * 100).toFixed(0)}%
           </span>
@@ -95,7 +112,7 @@ export function ReviewActions({
             icon={<RiCheckLine />}
             className="w-full sm:w-auto"
           >
-            Submit Classification
+            {submitting ? t("submittingReview") : t("submitReview")}
           </Button>
         ) : (
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
@@ -107,7 +124,7 @@ export function ReviewActions({
               variant="secondary"
               icon={<RiArrowRightLine />}
             >
-              Next Item
+              {t("nextCandidate")}
             </Button>
           </div>
         )}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLanguage } from "@/lib/i18n";
 import {
   RiMenuLine,
   RiCloseLine,
@@ -16,26 +17,27 @@ import {
   RiShieldUserLine,
 } from "react-icons/ri";
 
-const navItems = [
-  { href: "/", label: "Home", icon: <RiHome4Line /> },
-  { href: "/explore", label: "Explore Sky", icon: <RiCompass3Line /> },
-  { href: "/timeline", label: "Timeline", icon: <RiTimeLine /> },
-  { href: "/compare", label: "Compare Epochs", icon: <RiContrast2Line /> },
-  { href: "/review", label: "Citizen Review", icon: <RiEyeLine /> },
-  { href: "/about", label: "About Mission", icon: <RiInformationLine /> },
-  { href: "/team", label: "Our Team", icon: <RiTeamLine /> },
-  { href: "/admin", label: "Admin Ops", icon: <RiShieldUserLine /> },
-];
-
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const { t } = useLanguage();
+
+  const navItems = [
+    { href: "/", label: t("home"), icon: <RiHome4Line /> },
+    { href: "/explore", label: t("explore"), icon: <RiCompass3Line /> },
+    { href: "/timeline", label: t("timeline"), icon: <RiTimeLine /> },
+    { href: "/compare", label: t("compare"), icon: <RiContrast2Line /> },
+    { href: "/review", label: t("review"), icon: <RiEyeLine /> },
+    { href: "/about", label: t("about"), icon: <RiInformationLine /> },
+    { href: "/team", label: t("team"), icon: <RiTeamLine /> },
+    { href: "/admin", label: t("admin"), icon: <RiShieldUserLine /> },
+  ];
 
   return (
     <div className="md:hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
+        className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white cursor-pointer"
         aria-label="Toggle mobile menu"
       >
         {open ? <RiCloseLine className="w-5 h-5" /> : <RiMenuLine className="w-5 h-5" />}
@@ -57,7 +59,7 @@ export function MobileMenu() {
                   onClick={() => setOpen(false)}
                   className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
                     isActive
-                      ? "bg-sky-500/20 text-sky-400 border border-sky-500/30"
+                      ? "bg-sky-500/20 text-sky-400 border border-sky-500/30 font-bold"
                       : "text-slate-300 hover:bg-slate-900"
                   }`}
                 >

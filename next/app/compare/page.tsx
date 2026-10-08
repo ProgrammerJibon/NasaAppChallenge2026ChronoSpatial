@@ -8,10 +8,20 @@ import { CompareWorkspace } from "@/components/compare/CompareWorkspace";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Button } from "@/components/ui/Button";
+import { BeginnerExplainer } from "@/components/ui/BeginnerExplainer";
+import { useLanguage } from "@/lib/i18n";
 import { formatShortDate, formatWavelength } from "@/lib/format";
-import { RiContrast2Line, RiExchangeLine, RiSparklingLine, RiCompass3Line } from "react-icons/ri";
+import {
+  RiContrast2Line,
+  RiExchangeLine,
+  RiSparklingLine,
+  RiCompass3Line,
+  RiTimeLine,
+  RiEyeLine,
+} from "react-icons/ri";
 
 function CompareContent() {
+  const { t } = useLanguage();
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -223,11 +233,11 @@ function CompareContent() {
             <div className="flex items-center gap-2 mb-1">
               <RiContrast2Line className="text-purple-400 w-5 h-5" />
               <h1 className="text-xl font-bold text-white tracking-tight">
-                Change Comparison Workspace
+                {t("compareHeading")}
               </h1>
             </div>
             <p className="text-xs text-slate-400">
-              Compare two observation epochs of the same sky region with aligned WCS reprojection, swipe/blink modes, and scientific flux delta maps.
+              {t("compareSub")}
             </p>
           </div>
 
@@ -235,7 +245,7 @@ function CompareContent() {
           <div className="flex flex-wrap items-center gap-2">
             {/* Epoch A select */}
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs">
-              <span className="text-sky-400 font-bold">Epoch A:</span>
+              <span className="text-sky-400 font-bold">{t("epochALabel")}</span>
               <select
                 value={obsA?.id || ""}
                 onChange={(e) => handleChangeEpochA(e.target.value)}
@@ -253,14 +263,14 @@ function CompareContent() {
               type="button"
               onClick={handleSwapEpochs}
               className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer"
-              title="Swap Epoch A and B"
+              title={t("swapEpochs")}
             >
               <RiExchangeLine className="w-4 h-4" />
             </button>
 
             {/* Epoch B select */}
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs">
-              <span className="text-purple-400 font-bold">Epoch B:</span>
+              <span className="text-purple-400 font-bold">{t("epochBLabel")}</span>
               <select
                 value={obsB?.id || ""}
                 onChange={(e) => handleChangeEpochB(e.target.value)}
@@ -280,7 +290,7 @@ function CompareContent() {
         <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/80">
           <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider flex items-center gap-1">
             <RiCompass3Line className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Target Region:</span>
+            <span>{t("targetRegionLabel")}</span>
           </span>
           {regions.map((reg) => {
             const isSelected = selectedRegionId === reg.id;
@@ -301,6 +311,34 @@ function CompareContent() {
         </div>
       </div>
 
+      {/* Beginner Guide Explainer */}
+      <BeginnerExplainer
+        pageTitle={t("compareHeading")}
+        pagePurpose={t("compareSub")}
+        items={[
+          {
+            icon: <RiContrast2Line className="w-4 h-4 text-sky-400" />,
+            term: t("modeSideBySide"),
+            definition: t("swipeDesc"),
+          },
+          {
+            icon: <RiContrast2Line className="w-4 h-4 text-cyan-400" />,
+            term: t("modeSwipe"),
+            definition: t("swipeDesc"),
+          },
+          {
+            icon: <RiTimeLine className="w-4 h-4 text-amber-400" />,
+            term: t("modeBlink"),
+            definition: t("blinkDesc"),
+          },
+          {
+            icon: <RiSparklingLine className="w-4 h-4 text-purple-400" />,
+            term: t("modeDifference"),
+            definition: t("differenceDesc"),
+          },
+        ]}
+      />
+
       {/* Main Workspace Stage */}
       {loading ? (
         <div className="flex flex-col items-center justify-center p-16 rounded-3xl bg-slate-950/60 border border-slate-800">
@@ -308,10 +346,10 @@ function CompareContent() {
           <h3 className="text-base font-semibold text-white mb-1">
             {jobProgress !== null
               ? `Processing Scientific Difference (${jobProgress.toFixed(0)}%)...`
-              : "Aligning and Loading Observations..."}
+              : t("aligningAndLoading")}
           </h3>
           <p className="text-xs text-slate-400 max-w-sm text-center">
-            Performing celestial WCS bilinear reprojection and statistical source detection.
+            {t("reprojectionNote")}
           </p>
         </div>
       ) : comparison && obsA && obsB ? (

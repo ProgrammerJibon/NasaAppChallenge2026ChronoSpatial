@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { parseCoordinates } from "@/lib/coordinates";
+import { useLanguage } from "@/lib/i18n";
 import { RiSearchLine, RiCompassDiscoverLine } from "react-icons/ri";
 
 export interface CoordinateSearchProps {
@@ -10,6 +11,7 @@ export interface CoordinateSearchProps {
 }
 
 export function CoordinateSearch({ onSearch, loading = false }: CoordinateSearchProps) {
+  const { t } = useLanguage();
   const [query, setQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -41,7 +43,7 @@ export function CoordinateSearch({ onSearch, loading = false }: CoordinateSearch
             setQuery(e.target.value);
             if (error) setError(null);
           }}
-          placeholder="Search target or coordinates (e.g. M31, Orion, 10.098, 39.143)..."
+          placeholder={t("searchPlaceholder")}
           className="w-full pl-10 pr-24 py-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-sm text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition"
         />
         <button
@@ -49,7 +51,7 @@ export function CoordinateSearch({ onSearch, loading = false }: CoordinateSearch
           disabled={loading || !query.trim()}
           className="absolute right-1.5 px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 disabled:opacity-40 text-white text-xs font-medium transition cursor-pointer"
         >
-          {loading ? "Searching..." : "Search"}
+          {loading ? t("searchingBtn") : t("searchBtn")}
         </button>
       </form>
 
@@ -58,7 +60,7 @@ export function CoordinateSearch({ onSearch, loading = false }: CoordinateSearch
       {/* Quick Suggestions */}
       <div className="flex flex-wrap items-center gap-1.5 mt-2 text-xs text-slate-400">
         <span className="flex items-center gap-1 text-[11px] text-slate-400">
-          <RiCompassDiscoverLine className="w-3 h-3" /> Quick targets:
+          <RiCompassDiscoverLine className="w-3 h-3" /> {t("quickTargets")}
         </span>
         <button
           type="button"

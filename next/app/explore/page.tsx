@@ -14,14 +14,19 @@ import { MetadataPanel } from "@/components/sky/MetadataPanel";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { formatDate, formatCoords, formatWavelength } from "@/lib/format";
+import { BeginnerExplainer } from "@/components/ui/BeginnerExplainer";
+import { useLanguage } from "@/lib/i18n";
 import {
   RiTimeLine,
   RiContrast2Line,
   RiArrowLeftLine,
   RiArrowRightLine,
+  RiCompass3Line,
+  RiSparklingLine,
 } from "react-icons/ri";
 
 function ExploreContent() {
+  const { t } = useLanguage();
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -175,7 +180,7 @@ function ExploreContent() {
 
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-2 border-t border-slate-800/80">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-400">Regions:</span>
+            <span className="text-xs font-semibold text-slate-400">{t("regionsLabel")}</span>
             <RegionSelector
               regions={regions}
               selectedSlug={selectedRegion?.slug}
@@ -184,7 +189,7 @@ function ExploreContent() {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-400">Filter:</span>
+            <span className="text-xs font-semibold text-slate-400">{t("filterLabel")}</span>
             <BandSelector
               selectedBand={selectedBand}
               onSelectBand={handleSelectBand}
@@ -192,6 +197,34 @@ function ExploreContent() {
           </div>
         </div>
       </div>
+
+      {/* Beginner Guide Explainer */}
+      <BeginnerExplainer
+        pageTitle={t("exploreHeading")}
+        pagePurpose={t("exploreSub")}
+        items={[
+          {
+            icon: <RiCompass3Line className="w-4 h-4 text-cyan-400" />,
+            term: t("raDecTitle"),
+            definition: t("raDecDesc"),
+          },
+          {
+            icon: <RiSparklingLine className="w-4 h-4 text-amber-400" />,
+            term: t("bandTitle"),
+            definition: t("bandDesc"),
+          },
+          {
+            icon: <RiContrast2Line className="w-4 h-4 text-purple-400" />,
+            term: t("differenceTitle"),
+            definition: t("differenceDesc"),
+          },
+          {
+            icon: <RiTimeLine className="w-4 h-4 text-sky-400" />,
+            term: t("epochTitle"),
+            definition: t("epochDesc"),
+          },
+        ]}
+      />
 
       {/* Main Grid: Interactive Viewer + Sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -210,7 +243,7 @@ function ExploreContent() {
               />
             ) : (
               <div className="flex items-center justify-center h-[520px] text-slate-400 text-xs">
-                No observation selected.
+                {t("noObsSelected")}
               </div>
             )}
 
@@ -235,7 +268,7 @@ function ExploreContent() {
                     onClick={handlePrevObs}
                     disabled={currentObsIndex <= 0}
                     className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-slate-300 transition"
-                    title="Previous Observation"
+                    title={t("prevObs")}
                   >
                     <RiArrowLeftLine className="w-4 h-4" />
                   </button>
@@ -247,7 +280,7 @@ function ExploreContent() {
                     onClick={handleNextObs}
                     disabled={currentObsIndex >= observations.length - 1}
                     className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-slate-300 transition"
-                    title="Next Observation"
+                    title={t("nextObs")}
                   >
                     <RiArrowRightLine className="w-4 h-4" />
                   </button>
@@ -260,7 +293,7 @@ function ExploreContent() {
           {selectedObs && (
             <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-slate-900/40 border border-slate-800">
               <span className="text-xs text-slate-300">
-                Want to investigate temporal changes for this field?
+                {t("quickInvestigateTitle")}
               </span>
 
               <div className="flex items-center gap-3">
@@ -269,7 +302,7 @@ function ExploreContent() {
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 transition"
                 >
                   <RiTimeLine className="text-sky-400" />
-                  <span>Open in Timeline</span>
+                  <span>{t("openInTimeline")}</span>
                 </Link>
 
                 <Link
@@ -277,7 +310,7 @@ function ExploreContent() {
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-medium text-white shadow-md shadow-purple-950/20 transition"
                 >
                   <RiContrast2Line />
-                  <span>Compare this Epoch</span>
+                  <span>{t("compareThisEpoch")}</span>
                 </Link>
               </div>
             </div>
@@ -291,7 +324,7 @@ function ExploreContent() {
         <div className="lg:col-span-4 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-slate-200">
-              Epoch Observations ({observations.length})
+              {t("epochObservations")} ({observations.length})
             </h3>
             <span className="text-[11px] font-mono text-slate-400">
               {selectedRegion?.name}

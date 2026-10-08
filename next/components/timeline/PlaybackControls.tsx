@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useLanguage } from "@/lib/i18n";
 import {
   RiPlayFill,
   RiPauseFill,
@@ -35,6 +36,7 @@ export function PlaybackControls({
   crossfade,
   onToggleCrossfade,
 }: PlaybackControlsProps) {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 p-3 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-md">
       {/* Playback Buttons */}
@@ -95,7 +97,7 @@ export function PlaybackControls({
           title="Toggle Repeat / Loop"
         >
           <RiRepeatLine className="w-3.5 h-3.5" />
-          <span>Loop</span>
+          <span>{t("loopLabel")}</span>
         </button>
 
         {/* Crossfade toggle */}
@@ -109,7 +111,7 @@ export function PlaybackControls({
           }`}
           title="Smooth crossfade transition between epochs"
         >
-          Crossfade
+          {t("crossfadeLabel")}
         </button>
       </div>
     </div>

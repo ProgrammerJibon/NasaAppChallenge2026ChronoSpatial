@@ -7,9 +7,20 @@ import { ReviewCard } from "@/components/review/ReviewCard";
 import { ReviewActions } from "@/components/review/ReviewActions";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { RiEyeLine, RiCommunityLine, RiShieldCheckLine } from "react-icons/ri";
+import { BeginnerExplainer } from "@/components/ui/BeginnerExplainer";
+import { useLanguage } from "@/lib/i18n";
+import {
+  RiEyeLine,
+  RiCommunityLine,
+  RiShieldCheckLine,
+  RiSparklingLine,
+  RiCompass3Line,
+  RiContrast2Line,
+  RiAlertLine,
+} from "react-icons/ri";
 
 export default function ReviewPage() {
+  const { t } = useLanguage();
   const [item, setItem] = useState<ReviewItem | null>(null);
   const [stats, setStats] = useState<ReviewStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -91,19 +102,47 @@ export default function ReviewPage() {
           <div className="flex items-center gap-2 mb-1">
             <RiEyeLine className="text-purple-400 w-5 h-5" />
             <h1 className="text-xl font-bold text-white tracking-tight">
-              Public Change Review
+              {t("reviewHeading")}
             </h1>
           </div>
           <p className="text-xs text-slate-400">
-            Citizen science inspection. Help verify whether detected candidate variations represent true cosmic changes or instrumental noise.
+            {t("reviewSub")}
           </p>
         </div>
 
         <div className="flex items-center gap-2 text-xs text-slate-300 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 font-mono">
           <RiShieldCheckLine className="text-emerald-400 w-4 h-4" />
-          <span>No Login Required · Privacy Preserved</span>
+          <span>{t("privacyBadge")}</span>
         </div>
       </div>
+
+      {/* Beginner Guide Explainer */}
+      <BeginnerExplainer
+        pageTitle={t("citizenReviewTitle")}
+        pagePurpose={t("citizenReviewDesc")}
+        items={[
+          {
+            icon: <RiSparklingLine className="w-4 h-4 text-amber-400" />,
+            term: t("transientTitle"),
+            definition: t("differenceDesc"),
+          },
+          {
+            icon: <RiCompass3Line className="w-4 h-4 text-cyan-400" />,
+            term: t("movingObjectTitle"),
+            definition: t("swipeDesc"),
+          },
+          {
+            icon: <RiContrast2Line className="w-4 h-4 text-purple-400" />,
+            term: t("variableStarTitle"),
+            definition: t("blinkDesc"),
+          },
+          {
+            icon: <RiAlertLine className="w-4 h-4 text-rose-400" />,
+            term: t("artifactTitle"),
+            definition: t("significanceDesc"),
+          },
+        ]}
+      />
 
       {/* Main Review Stage */}
       {loading ? (
@@ -129,7 +168,7 @@ export default function ReviewPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 font-semibold text-slate-200">
                     <RiCommunityLine className="text-sky-400" />
-                    <span>Community Consensus</span>
+                    <span>{t("communityStats")}</span>
                   </div>
                   <span className="font-mono text-slate-400">
                     {stats.totalReviews} {stats.totalReviews === 1 ? "review" : "reviews"}

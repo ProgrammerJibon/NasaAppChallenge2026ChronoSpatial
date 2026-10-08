@@ -22,6 +22,18 @@ interface ViewerState {
   setTheme: (theme: "dark" | "light") => void;
 }
 
+const getInitialTheme = (): "dark" | "light" => {
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem("spherex_theme");
+      if (stored === "light" || stored === "dark") return stored;
+    } catch {
+      // ignore
+    }
+  }
+  return "dark";
+};
+
 export const useViewerStore = create<ViewerState>((set) => ({
   zoom: 1,
   panX: 0,
@@ -30,7 +42,7 @@ export const useViewerStore = create<ViewerState>((set) => ({
   crosshairPos: null,
   selectedObservation: null,
   selectedRegion: null,
-  theme: "dark",
+  theme: getInitialTheme(),
 
   setZoom: (zoom) =>
     set((state) => ({
@@ -50,7 +62,40 @@ export const useViewerStore = create<ViewerState>((set) => ({
   setSelectedRegion: (selectedRegion) => set({ selectedRegion }),
 
   toggleTheme: () =>
-    set((state) => ({ theme: state.theme === "dark" ? "light" : "dark" })),
+    set((state) => {
+      const nextTheme = state.theme === "dark" ? "light" : "dark";
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("spherex_theme", nextTheme);
+          if (nextTheme === "light") {
+            document.documentElement.classList.add("light");
+            document.documentElement.classList.remove("dark");
+          } else {
+            document.documentElement.classList.add("dark");
+            document.documentElement.classList.remove("light");
+          }
+        }
+      } catch {
+        // ignore
+      }
+      return { theme: nextTheme };
+    }),
 
-  setTheme: (theme) => set({ theme }),
+  setTheme: (theme) => {
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("spherex_theme", theme);
+        if (theme === "light") {
+          document.documentElement.classList.add("light");
+          document.documentElement.classList.remove("dark");
+        } else {
+          document.documentElement.classList.add("dark");
+          document.documentElement.classList.remove("light");
+        }
+      }
+    } catch {
+      // ignore
+    }
+    set({ theme });
+  },
 }));

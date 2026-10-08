@@ -5,6 +5,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "server": "npm --prefix server run dev",
+    "next": "npm --prefix next run dev",
+    "python": "python -m pytest python/tests",
     "verify:structure": "node scripts/verify-structure.mjs",
     "test:next": "npm --prefix next test",
     "test:server": "npm --prefix server test",

@@ -9,6 +9,8 @@ import { Reveal } from "@/components/motion/Reveal";
 import { Counter } from "@/components/motion/Counter";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { BeginnerExplainer } from "@/components/ui/BeginnerExplainer";
+import { useLanguage } from "@/lib/i18n";
 import {
   RiCompass3Line,
   RiTimeLine,
@@ -20,6 +22,7 @@ import {
 } from "react-icons/ri";
 
 export default function HomePage() {
+  const { t } = useLanguage();
   const [bootstrap, setBootstrap] = useState<BootstrapData | null>(null);
   const [regions, setRegions] = useState<SkyRegion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,24 +61,22 @@ export default function HomePage() {
             <Reveal>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-950/60 border border-sky-800/60 text-sky-400 text-xs font-mono">
                 <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
-                <span>NASA SPHEREx Mission Survey Explorer</span>
+                <span>{t("heroBadge")}</span>
               </div>
             </Reveal>
 
             <Reveal delay={0.1}>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.1]">
-                Watch the Universe{" "}
+                {t("heroTitlePrefix")}{" "}
                 <span className="bg-gradient-to-r from-sky-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                  Change Across Time
+                  {t("heroTitleHighlight")}
                 </span>
               </h1>
             </Reveal>
 
             <Reveal delay={0.2}>
               <p className="text-base sm:text-lg text-slate-300 leading-relaxed max-w-xl">
-                NASA&apos;s SPHEREx maps the entire sky every six months in 102 near-infrared
-                wavelength channels. Step through repeat observations to discover variable stars,
-                moving solar system bodies, and transient cosmic phenomena.
+                {t("heroDesc")}
               </p>
             </Reveal>
 
@@ -86,7 +87,7 @@ export default function HomePage() {
                   className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-semibold text-sm shadow-lg shadow-sky-500/25 active:scale-95 transition"
                 >
                   <RiCompass3Line className="w-5 h-5" />
-                  <span>Explore the Sky</span>
+                  <span>{t("heroExploreBtn")}</span>
                 </Link>
 
                 <Link
@@ -94,7 +95,7 @@ export default function HomePage() {
                   className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 font-semibold text-sm active:scale-95 transition"
                 >
                   <RiContrast2Line className="w-5 h-5 text-purple-400" />
-                  <span>Watch It Change</span>
+                  <span>{t("heroCompareBtn")}</span>
                 </Link>
               </div>
             </Reveal>
@@ -102,7 +103,7 @@ export default function HomePage() {
             <Reveal delay={0.4}>
               <div className="flex items-center gap-2 text-xs text-slate-400 pt-2">
                 <RiShieldCheckLine className="w-4 h-4 text-emerald-400" />
-                <span>Calibrated Level-2 FITS imagery from NASA/IPAC IRSA archive</span>
+                <span>{t("heroTrustBadge")}</span>
               </div>
             </Reveal>
           </div>
@@ -155,25 +156,25 @@ export default function HomePage() {
               <Counter value={102} />
             </div>
             <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-medium">
-              Spectral Channels
+              {t("statChannels")}
             </p>
           </div>
 
           <div>
             <div className="text-3xl sm:text-4xl font-extrabold text-sky-400">
-              <Counter value={6} suffix=" mo" />
+              <Counter value={6} suffix={` ${t("suffixMonths")}`} />
             </div>
             <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-medium">
-              Survey Cadence
+              {t("statCadence")}
             </p>
           </div>
 
           <div>
             <div className="text-3xl sm:text-4xl font-extrabold text-purple-400">
-              <Counter value={4} suffix=" passes" />
+              <Counter value={4} suffix={` ${t("suffixPasses")}`} />
             </div>
             <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-medium">
-              All-Sky Coverage
+              {t("statCoverage")}
             </p>
           </div>
 
@@ -182,20 +183,48 @@ export default function HomePage() {
               <Counter value={450} suffix="M+" />
             </div>
             <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-medium">
-              Galaxies & Stars
+              {t("statSources")}
             </p>
           </div>
         </div>
       </section>
 
+      {/* Beginner Guide Overview */}
+      <BeginnerExplainer
+        pageTitle={t("exploreHeading")}
+        pagePurpose={t("heroDesc")}
+        items={[
+          {
+            icon: <RiCompass3Line className="w-4 h-4 text-cyan-400" />,
+            term: t("raDecTitle"),
+            definition: t("raDecDesc"),
+          },
+          {
+            icon: <RiTimeLine className="w-4 h-4 text-sky-400" />,
+            term: t("epochTitle"),
+            definition: t("epochDesc"),
+          },
+          {
+            icon: <RiSparklingLine className="w-4 h-4 text-amber-400" />,
+            term: t("bandTitle"),
+            definition: t("bandDesc"),
+          },
+          {
+            icon: <RiEyeLine className="w-4 h-4 text-emerald-400" />,
+            term: t("citizenReviewTitle"),
+            definition: t("citizenReviewDesc"),
+          },
+        ]}
+      />
+
       {/* 3-Step Challenge Workflow */}
       <section className="space-y-8">
         <div className="text-center max-w-2xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-            How to Explore Sky Changes
+            {t("workflowTitle")}
           </h2>
           <p className="text-sm text-slate-400 mt-2">
-            A reliable 3-step workflow designed to spot astronomical motion and brightness changes in seconds.
+            {t("workflowSub")}
           </p>
         </div>
 
@@ -206,19 +235,19 @@ export default function HomePage() {
               <RiCompass3Line className="w-5 h-5" />
             </div>
             <span className="text-xs font-mono text-sky-400 uppercase tracking-widest font-bold">
-              Step 1
+              {t("stepLabel")} 1
             </span>
             <h3 className="text-base font-semibold text-white mt-1 mb-2">
-              Find a Sky Region
+              {t("step1Title")}
             </h3>
             <p className="text-xs text-slate-400 leading-relaxed mb-4">
-              Search by object name (Andromeda, Orion, Pleiades) or enter exact celestial coordinates (RA/Dec) to find all observation epochs.
+              {t("step1Desc")}
             </p>
             <Link
               href="/explore"
               className="text-xs text-sky-400 hover:text-sky-300 font-medium inline-flex items-center gap-1"
             >
-              Start exploring <RiArrowRightLine />
+              {t("step1Btn")} <RiArrowRightLine />
             </Link>
           </div>
 
@@ -228,19 +257,19 @@ export default function HomePage() {
               <RiTimeLine className="w-5 h-5" />
             </div>
             <span className="text-xs font-mono text-purple-400 uppercase tracking-widest font-bold">
-              Step 2
+              {t("stepLabel")} 2
             </span>
             <h3 className="text-base font-semibold text-white mt-1 mb-2">
-              Time Travel the Cadence
+              {t("step2Title")}
             </h3>
             <p className="text-xs text-slate-400 leading-relaxed mb-4">
-              Play animated sequences across SPHEREx&apos;s 6-month survey passes. Watch the same patch of space animate chronologically.
+              {t("step2Desc")}
             </p>
             <Link
               href="/timeline"
               className="text-xs text-purple-400 hover:text-purple-300 font-medium inline-flex items-center gap-1"
             >
-              Open Timeline <RiArrowRightLine />
+              {t("step2Btn")} <RiArrowRightLine />
             </Link>
           </div>
 
@@ -250,19 +279,19 @@ export default function HomePage() {
               <RiContrast2Line className="w-5 h-5" />
             </div>
             <span className="text-xs font-mono text-indigo-400 uppercase tracking-widest font-bold">
-              Step 3
+              {t("stepLabel")} 3
             </span>
             <h3 className="text-base font-semibold text-white mt-1 mb-2">
-              Compare & Inspect
+              {t("step3Title")}
             </h3>
             <p className="text-xs text-slate-400 leading-relaxed mb-4">
-              Compare any two dates using Swipe, Blink, or scientific WCS Flux Difference maps generated from genuine FITS products.
+              {t("step3Desc")}
             </p>
             <Link
               href="/compare"
               className="text-xs text-indigo-400 hover:text-indigo-300 font-medium inline-flex items-center gap-1"
             >
-              Compare Epochs <RiArrowRightLine />
+              {t("step3Btn")} <RiArrowRightLine />
             </Link>
           </div>
         </div>
@@ -273,17 +302,17 @@ export default function HomePage() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-              Curated Sky Regions
+              {t("curatedRegionsTitle")}
             </h2>
             <p className="text-xs text-slate-400 mt-1">
-              Guaranteed real SPHEREx multi-epoch datasets ready for immediate inspection.
+              {t("curatedRegionsSub")}
             </p>
           </div>
           <Link
             href="/explore"
             className="text-xs font-medium text-sky-400 hover:text-sky-300 inline-flex items-center gap-1"
           >
-            All Regions <RiArrowRightLine />
+            {t("allRegions")} <RiArrowRightLine />
           </Link>
         </div>
 
@@ -317,9 +346,9 @@ export default function HomePage() {
                 </div>
 
                 <div className="pt-4 mt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-                  <span className="text-[11px] text-slate-400">Multi-Epoch Repeat</span>
+                  <span className="text-[11px] text-slate-400">{t("epochObservations")}</span>
                   <span className="text-sky-400 group-hover:translate-x-1 transition-transform">
-                    Inspect →
+                    {t("exploreRegion")} →
                   </span>
                 </div>
               </Link>
@@ -332,22 +361,21 @@ export default function HomePage() {
       <section className="p-8 rounded-3xl bg-gradient-to-r from-indigo-950/60 via-purple-950/40 to-slate-900 border border-indigo-900/50 flex flex-col md:flex-row items-center justify-between gap-6">
         <div>
           <span className="text-xs font-mono text-indigo-400 uppercase tracking-wider font-bold">
-            Public Citizen Science
+            {t("publicCitizenScience")}
           </span>
           <h3 className="text-xl font-bold text-white mt-1">
-            Help Verify Candidate Changes
+            {t("helpVerifyChanges")}
           </h3>
           <p className="text-xs text-slate-300 mt-1.5 max-w-lg leading-relaxed">
-            No single astronomer can review 450M sources. Join the community effort to classify
-            moving asteroid candidates, variable stars, and flare events in SPHEREx imagery.
+            {t("helpVerifyDesc")}
           </p>
         </div>
         <Link
           href="/review"
-          className="px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs whitespace-nowrap shadow-lg shadow-purple-900/30 transition flex items-center gap-2"
+          className="px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs whitespace-nowrap shadow-lg shadow-purple-950/30 transition flex items-center gap-2"
         >
           <RiEyeLine className="w-4 h-4" />
-          <span>Start Reviewing</span>
+          <span>{t("startReviewing")}</span>
         </Link>
       </section>
     </div>

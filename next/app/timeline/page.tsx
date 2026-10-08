@@ -9,9 +9,18 @@ import { RegionSelector } from "@/components/sky/RegionSelector";
 import { BandSelector } from "@/components/sky/BandSelector";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { RiTimeLine, RiInformationLine } from "react-icons/ri";
+import { BeginnerExplainer } from "@/components/ui/BeginnerExplainer";
+import { useLanguage } from "@/lib/i18n";
+import {
+  RiTimeLine,
+  RiInformationLine,
+  RiSparklingLine,
+  RiContrast2Line,
+  RiCompass3Line,
+} from "react-icons/ri";
 
 function TimelineContent() {
+  const { t } = useLanguage();
   const searchParams = useSearchParams();
 
   const [regions, setRegions] = useState<SkyRegion[]>([]);
@@ -104,11 +113,11 @@ function TimelineContent() {
           <div className="flex items-center gap-2 mb-1">
             <RiTimeLine className="text-sky-400 w-5 h-5" />
             <h1 className="text-xl font-bold text-white tracking-tight">
-              Temporal Sky Viewer
+              {t("timelineHeading")}
             </h1>
           </div>
           <p className="text-xs text-slate-400">
-            Chronological multi-epoch animation. Observe cosmic motion and brightness changes over 6-month survey passes.
+            {t("timelineSub")}
           </p>
         </div>
 
@@ -125,6 +134,34 @@ function TimelineContent() {
           />
         </div>
       </div>
+
+      {/* Beginner Explainer */}
+      <BeginnerExplainer
+        pageTitle={t("timelineHeading")}
+        pagePurpose={t("timelineSub")}
+        items={[
+          {
+            icon: <RiTimeLine className="w-4 h-4 text-sky-400" />,
+            term: t("epochTitle"),
+            definition: t("epochDesc"),
+          },
+          {
+            icon: <RiSparklingLine className="w-4 h-4 text-amber-400" />,
+            term: t("speedLabel"),
+            definition: t("statCadence"),
+          },
+          {
+            icon: <RiContrast2Line className="w-4 h-4 text-purple-400" />,
+            term: t("crossfadeLabel"),
+            definition: t("differenceDesc"),
+          },
+          {
+            icon: <RiCompass3Line className="w-4 h-4 text-cyan-400" />,
+            term: t("comparePair"),
+            definition: t("step3Desc"),
+          },
+        ]}
+      />
 
       {/* Main Timeline Stage */}
       {loading ? (

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { api, ApiError } from "@/lib/api";
 import type { ProcessingJob } from "@/lib/types";
 import { formatDate } from "@/lib/format";
+import { BeginnerExplainer } from "@/components/ui/BeginnerExplainer";
 import {
   RiShieldCheckLine,
   RiLockPasswordLine,
@@ -272,6 +273,34 @@ export default function AdminPage() {
           </button>
         </div>
       </div>
+
+      {/* Beginner Guide Explainer */}
+      <BeginnerExplainer
+        pageTitle="System Operations & Administration"
+        pagePurpose="This dashboard lets administrators and scientists monitor server health, observe background Astropy reprojection tasks, manage the scientific processing queue, and monitor disk storage for FITS images and previews."
+        items={[
+          {
+            icon: <RiServerLine className="w-4 h-4 text-cyan-400" />,
+            term: "API Gateway & Database",
+            definition: "Monitors the Node.js Express server uptime and connection status with the local MySQL 'spherex_atlas' database.",
+          },
+          {
+            icon: <RiCpuLine className="w-4 h-4 text-purple-400" />,
+            term: "Science Worker Daemon",
+            definition: "Tracks whether the Python background worker is actively crunching Astropy WCS reprojections and difference images.",
+          },
+          {
+            icon: <RiPlayListLine className="w-4 h-4 text-amber-400" />,
+            term: "Processing Queue",
+            definition: "Shows background tasks for comparing epochs and searching IRSA. You can cancel active tasks or retry failed tasks.",
+          },
+          {
+            icon: <RiHardDriveLine className="w-4 h-4 text-emerald-400" />,
+            term: "Disk Storage & Cache",
+            definition: "Measures disk space used by raw FITS files and preview WebPs. Use 'Clean Cache' to purge temporary working files.",
+          },
+        ]}
+      />
 
       {/* Action Notification Banner */}
       {actionMessage && (

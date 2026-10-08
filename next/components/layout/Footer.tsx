@@ -1,7 +1,11 @@
+"use client";
+
 import Link from "next/link";
+import { useLanguage } from "@/lib/i18n";
 import { RiExternalLinkLine } from "react-icons/ri";
 
 export function Footer() {
+  const { t } = useLanguage();
   return (
     <footer className="w-full border-t border-slate-800/80 bg-slate-950 text-slate-400 text-sm py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -17,39 +21,37 @@ export function Footer() {
               </span>
             </div>
             <p className="text-slate-400 text-xs leading-relaxed max-w-md mb-4">
-              A specialized public exploration tool for NASA&apos;s SPHEREx mission.
-              Search real all-sky observations across 6-month survey epochs and detect
-              motion, transients, and variable sources across 102 near-infrared channels.
+              {t("heroDesc")}
             </p>
             <div className="text-[11px] text-slate-400">
-              Data sourced directly from NASA/IPAC Infrared Science Archive (IRSA) Level-2 products.
+              {t("heroTrustBadge")}
             </div>
           </div>
 
           {/* Navigation Links */}
           <div>
             <h5 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-3">
-              Explorer Pages
+              {t("explore")}
             </h5>
             <ul className="space-y-2 text-xs">
               <li>
                 <Link href="/explore" className="hover:text-sky-400 transition">
-                  Sky Explorer (Spatial)
+                  {t("explore")} (Spatial)
                 </Link>
               </li>
               <li>
                 <Link href="/timeline" className="hover:text-sky-400 transition">
-                  Temporal Sky Viewer
+                  {t("timeline")} (Temporal)
                 </Link>
               </li>
               <li>
                 <Link href="/compare" className="hover:text-sky-400 transition">
-                  Epoch Change Comparison
+                  {t("compare")}
                 </Link>
               </li>
               <li>
                 <Link href="/review" className="hover:text-sky-400 transition">
-                  Citizen Science Review
+                  {t("review")}
                 </Link>
               </li>
             </ul>
@@ -58,17 +60,17 @@ export function Footer() {
           {/* Challenge & Team */}
           <div>
             <h5 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-3">
-              Event & Context
+              {t("about")}
             </h5>
             <ul className="space-y-2 text-xs">
               <li>
                 <Link href="/team" className="hover:text-sky-400 transition">
-                  Team A-JINX (Bangladesh)
+                  Team A-JINX ({t("team")})
                 </Link>
               </li>
               <li>
                 <Link href="/about" className="hover:text-sky-400 transition">
-                  Scientific Methodology
+                  {t("about")}
                 </Link>
               </li>
               <li>
@@ -101,7 +103,7 @@ export function Footer() {
           </div>
           <div className="flex items-center gap-4">
             <Link href="/admin" className="hover:text-slate-300 transition">
-              Admin Ops
+              {t("admin")}
             </Link>
             <span>·</span>
             <span>All FITS data courtesy of NASA / JPL-Caltech / IPAC</span>
