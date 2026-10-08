@@ -18,6 +18,7 @@
     "typecheck": "npm run typecheck:next && npm run typecheck:server",
     "build:server": "npm --prefix server run build",
     "build:next": "npm --prefix next run build",
+    "build:standalone": "npm run build:server && npm --prefix next run build:standalone",
     "build": "npm run build:server && npm run build:next",
     "clean": "node scripts/clean-generated.mjs",
     "verify": "npm run verify:structure && npm run test && npm run build"

@@ -116,6 +116,18 @@ def run_job(conn, job):
             )
         return False
 
+def drain_queue(conn) -> int:
+    """Process all queued jobs until queue is empty (ideal for cron or webhooks)."""
+    reset_stale_jobs(conn)
+    count = 0
+    while True:
+        job = claim_job(conn)
+        if not job:
+            break
+        run_job(conn, job)
+        count += 1
+    return count
+
 def worker_loop(max_iterations: int | None = None, poll_interval: float = 2.0):
     logger.info("SPHEREx science worker started.")
     db_conn = connect()
@@ -144,4 +156,20 @@ def worker_loop(max_iterations: int | None = None, poll_interval: float = 2.0):
         logger.info("SPHEREx science worker stopped.")
 
 if __name__ == "__main__":
-    worker_loop()
+    import argparse
+    parser = argparse.ArgumentParser(description="SPHEREx Science Worker Daemon")
+    parser.add_argument("--once", action="store_true", help="Drain queued jobs once and exit (recommended for cPanel cron jobs)")
+    parser.add_argument("--max-iterations", type=int, default=None, help="Maximum loop iterations before exiting")
+    parser.add_argument("--poll-interval", type=float, default=2.0, help="Poll interval in seconds")
+    args = parser.parse_args()
+
+    if args.once:
+        conn = connect()
+        try:
+            processed = drain_queue(conn)
+            logger.info(f"Queue drained. Processed {processed} jobs.")
+        finally:
+            conn.close()
+    else:
+        worker_loop(max_iterations=args.max_iterations, poll_interval=args.poll_interval)
+
