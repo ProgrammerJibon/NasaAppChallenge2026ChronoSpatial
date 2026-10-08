@@ -1,0 +1,1335 @@
+{
+  "default_region": "m31",
+  "featured_regions": [
+    {
+      "id": "region-m31",
+      "slug": "m31",
+      "name": "Andromeda Galaxy (M31)",
+      "description": "The nearest major galaxy to the Milky Way, located 2.5 million light-years away. SPHEREx monitors the extended disk for variable stars, nova outbursts, and dust emission shifts across 6-month survey passes.",
+      "ra": 10.098,
+      "dec": 39.143,
+      "radius_deg": 0.25,
+      "is_featured": true,
+      "highlight": "Repeat observations from July 2025 and July 2026 showing stellar stability and variable sources."
+    },
+    {
+      "slug": "orion",
+      "id": "region-orion",
+      "name": "Orion Nebula & Molecular Cloud (M42)",
+      "description": "One of the most active star-forming regions in the local Milky Way. Dense molecular gas, young protostars, and outflow shocks exhibit infrared temporal variations between SPHEREx passes.",
+      "ra": 82.821,
+      "dec": -3.99,
+      "radius_deg": 0.25,
+      "is_featured": true,
+      "highlight": "Multi-epoch observations from September 2025 and March 2026 revealing photometric variability in protostellar candidates."
+    },
+    {
+      "slug": "pleiades",
+      "id": "region-pleiades",
+      "name": "Pleiades Cluster (M45)",
+      "description": "An open star cluster in Taurus containing over 1,000 confirmed stars. Ideal baseline for photometric cross-calibration and tracking fast-moving solar system objects crossing the ecliptic lane.",
+      "ra": 56.655,
+      "dec": 24.84,
+      "radius_deg": 0.25,
+      "is_featured": true,
+      "highlight": "Six-month cadence survey passes from August 2025 and February 2026."
+    },
+    {
+      "slug": "galactic-center",
+      "id": "region-galactic-center",
+      "name": "Galactic Center & Bulge",
+      "description": "The heart of the Milky Way, obscured in visible light by dust but transparent in SPHEREx near-infrared wavelengths. Contains extreme stellar densities, variable Mira stars, and transient infrared flares.",
+      "ra": 266.185,
+      "dec": -28.153,
+      "radius_deg": 0.25,
+      "is_featured": true,
+      "highlight": "Comparing August 2025 and March 2026 near-infrared epochs through deep dust lanes."
+    },
+    {
+      "slug": "south-ecliptic-pole",
+      "id": "region-south-ecliptic-pole",
+      "name": "South Ecliptic Pole Deep Field",
+      "description": "SPHEREx deep survey convergence zone near the ecliptic pole, visited frequently on every orbital revolution. Yields high signal-to-noise ratio measurements for faint brown dwarfs and distant galaxies.",
+      "ra": 90.015,
+      "dec": -66.621,
+      "radius_deg": 0.25,
+      "is_featured": true,
+      "highlight": "Multi-pass integration with repeat observations between April 2025 and July 2026."
+    }
+  ],
+  "observations": [
+    {
+      "id": "obs-05fdd84dd3b8",
+      "archive_id": "2025W34_2B_0098_1",
+      "region_id": "region-pleiades",
+      "observation_date": "2025-08-22T00:29:17.067",
+      "ra": 56.654953,
+      "dec": 24.839526,
+      "band_number": 2,
+      "wavelength_min_um": 1.45,
+      "wavelength_max_um": 2.05,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W34_2B_0098_1",
+      "fits_path": "fits/05fdd84dd3b8e59cff1d02739d6444c189dc9265d9e8f9dd30ed46aaf146a711.fits",
+      "preview_path": "previews/05fdd84dd3b8e59cff1d02739d6444c189dc9265d9e8f9dd30ed46aaf146a711.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 2,
+        "obsid": "2025W34_2B_0098_1",
+        "wcs": {
+          "crval1": 56.6549526984,
+          "crval2": 24.8395260668,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-0721c95df64b",
+      "archive_id": "2026W13_1A_0301_2",
+      "region_id": "region-galactic-center",
+      "observation_date": "2026-03-24T14:23:58.613",
+      "ra": 266.185475,
+      "dec": -28.15333,
+      "band_number": 2,
+      "wavelength_min_um": 1.45,
+      "wavelength_max_um": 2.05,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W13_1A_0301_2",
+      "fits_path": "fits/0721c95df64b78e97c058014b8c12e057551a507aaeb11718d36d76713810b63.fits",
+      "preview_path": "previews/0721c95df64b78e97c058014b8c12e057551a507aaeb11718d36d76713810b63.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 2,
+        "obsid": "2026W13_1A_0301_2",
+        "wcs": {
+          "crval1": 266.185474916,
+          "crval2": -28.1533295822,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-0acc3c853692",
+      "archive_id": "2025W17_4B_0180_1",
+      "region_id": "region-south-ecliptic-pole",
+      "observation_date": "2025-04-25T22:18:56.431",
+      "ra": 90.015269,
+      "dec": -66.621401,
+      "band_number": 2,
+      "wavelength_min_um": 1.45,
+      "wavelength_max_um": 2.05,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W17_4B_0180_1",
+      "fits_path": "fits/0acc3c853692f760d93a7f9bad7ee56b50fe3e19f225d134a5f77f2e5cefedcd.fits",
+      "preview_path": "previews/0acc3c853692f760d93a7f9bad7ee56b50fe3e19f225d134a5f77f2e5cefedcd.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 2,
+        "obsid": "2025W17_4B_0180_1",
+        "wcs": {
+          "crval1": 90.0152686338,
+          "crval2": -66.6214010162,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-0fe6393c92e4",
+      "archive_id": "2026W13_1A_0229_2",
+      "region_id": "region-galactic-center",
+      "observation_date": "2026-03-24T04:37:03.625",
+      "ra": 265.489129,
+      "dec": -30.031402,
+      "band_number": 3,
+      "wavelength_min_um": 2.15,
+      "wavelength_max_um": 2.75,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W13_1A_0229_2",
+      "fits_path": "fits/0fe6393c92e4f8d73df14067e8aa38f0b16043fc904a3ae33129aa6331627e05.fits",
+      "preview_path": "previews/0fe6393c92e4f8d73df14067e8aa38f0b16043fc904a3ae33129aa6331627e05.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 3,
+        "obsid": "2026W13_1A_0229_2",
+        "wcs": {
+          "crval1": 265.489128623,
+          "crval2": -30.0314020016,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-orion-epoch-a",
+      "archive_id": "2025W37_1A_0365_2",
+      "region_id": "region-orion",
+      "observation_date": "2025-09-09T20:02:05.906",
+      "ra": 82.821034,
+      "dec": -3.990092,
+      "band_number": 2,
+      "wavelength_min_um": 1.45,
+      "wavelength_max_um": 2.05,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W37_1A_0365_2",
+      "fits_path": "fits/2e36a6a6998e48f3d70b77406025f76ba4be17bdc73c171744199716e802ef81.fits",
+      "preview_path": "previews/2e36a6a6998e48f3d70b77406025f76ba4be17bdc73c171744199716e802ef81.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 2,
+        "obsid": "2025W37_1A_0365_2",
+        "wcs": {
+          "crval1": 82.8210336314,
+          "crval2": -3.99009206626,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-3123a7709c2e",
+      "archive_id": "2026W29_2A_0546_1",
+      "region_id": "region-south-ecliptic-pole",
+      "observation_date": "2026-07-19T04:58:22.910",
+      "ra": 90.944176,
+      "dec": -66.971325,
+      "band_number": 5,
+      "wavelength_min_um": 3.55,
+      "wavelength_max_um": 4.15,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W29_2A_0546_1",
+      "fits_path": "fits/3123a7709c2eb550a990373742d2e83f706fdc3240a5e4c0311664a1e1c1ea87.fits",
+      "preview_path": "previews/3123a7709c2eb550a990373742d2e83f706fdc3240a5e4c0311664a1e1c1ea87.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 5,
+        "obsid": "2026W29_2A_0546_1",
+        "wcs": {
+          "crval1": 90.9441763124,
+          "crval2": -66.9713249288,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-m31-epoch-b",
+      "archive_id": "2025W28_2A_0555_4",
+      "region_id": "region-m31",
+      "observation_date": "2025-07-13T13:30:39.071",
+      "ra": 9.975729,
+      "dec": 39.334951,
+      "band_number": 5,
+      "wavelength_min_um": 3.55,
+      "wavelength_max_um": 4.15,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W28_2A_0555_4",
+      "fits_path": "fits/3b18163674e86f3f392f8db824a918dcd3b7f409230e131199dca9f9b88f4584.fits",
+      "preview_path": "previews/3b18163674e86f3f392f8db824a918dcd3b7f409230e131199dca9f9b88f4584.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 5,
+        "obsid": "2025W28_2A_0555_4",
+        "wcs": {
+          "crval1": 9.97572921072,
+          "crval2": 39.3349514773,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-3b7d7df5a726",
+      "archive_id": "2025W35_2A_0337_1",
+      "region_id": "region-galactic-center",
+      "observation_date": "2025-08-30T06:33:38.126",
+      "ra": 265.617236,
+      "dec": -29.153428,
+      "band_number": 1,
+      "wavelength_min_um": 0.75,
+      "wavelength_max_um": 1.35,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W35_2A_0337_1",
+      "fits_path": "fits/3b7d7df5a7264735f850ac3628fce0631fb6533735422a0ebd4e9f2f2a40ce86.fits",
+      "preview_path": "previews/3b7d7df5a7264735f850ac3628fce0631fb6533735422a0ebd4e9f2f2a40ce86.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 1,
+        "obsid": "2025W35_2A_0337_1",
+        "wcs": {
+          "crval1": 265.617235677,
+          "crval2": -29.1534277468,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-406e8d6fc0e2",
+      "archive_id": "2026W08_1A_0090_1",
+      "region_id": "region-pleiades",
+      "observation_date": "2026-02-16T10:37:37.576",
+      "ra": 56.73619,
+      "dec": 24.863659,
+      "band_number": 2,
+      "wavelength_min_um": 1.45,
+      "wavelength_max_um": 2.05,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W08_1A_0090_1",
+      "fits_path": "fits/406e8d6fc0e27b2c6423aa2c22df9fa52a9e1786b88f3cba4fa92ef573757ce1.fits",
+      "preview_path": "previews/406e8d6fc0e27b2c6423aa2c22df9fa52a9e1786b88f3cba4fa92ef573757ce1.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 2,
+        "obsid": "2026W08_1A_0090_1",
+        "wcs": {
+          "crval1": 56.7361901222,
+          "crval2": 24.8636592209,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-41c18948817a",
+      "archive_id": "2026W07_2A_0411_1",
+      "region_id": "region-pleiades",
+      "observation_date": "2026-02-14T16:15:43.169",
+      "ra": 57.309778,
+      "dec": 22.481971,
+      "band_number": 5,
+      "wavelength_min_um": 3.55,
+      "wavelength_max_um": 4.15,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W07_2A_0411_1",
+      "fits_path": "fits/41c18948817a9046fc18df489eb2f164d2a82679324053ff433bdd881cbc1449.fits",
+      "preview_path": "previews/41c18948817a9046fc18df489eb2f164d2a82679324053ff433bdd881cbc1449.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 5,
+        "obsid": "2026W07_2A_0411_1",
+        "wcs": {
+          "crval1": 57.3097784257,
+          "crval2": 22.481970668,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-orion-epoch-b",
+      "archive_id": "2026W12_1A_0205_4",
+      "region_id": "region-orion",
+      "observation_date": "2026-03-17T02:32:55.826",
+      "ra": 85.367932,
+      "dec": -3.800659,
+      "band_number": 4,
+      "wavelength_min_um": 2.85,
+      "wavelength_max_um": 3.45,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W12_1A_0205_4",
+      "fits_path": "fits/46a9bfbb886f879994ede53a111d102145eb8fd752a3181c2e593bdc84cbf007.fits",
+      "preview_path": "previews/46a9bfbb886f879994ede53a111d102145eb8fd752a3181c2e593bdc84cbf007.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 4,
+        "obsid": "2026W12_1A_0205_4",
+        "wcs": {
+          "crval1": 85.3679319681,
+          "crval2": -3.80065946963,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-4b6bbfea90a7",
+      "archive_id": "2026W13_2A_0017_2",
+      "region_id": "region-galactic-center",
+      "observation_date": "2026-03-26T13:37:35.359",
+      "ra": 265.557629,
+      "dec": -28.462862,
+      "band_number": 3,
+      "wavelength_min_um": 2.15,
+      "wavelength_max_um": 2.75,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W13_2A_0017_2",
+      "fits_path": "fits/4b6bbfea90a7c31b74113eca0cbb031e3dc6b87632cfabf70b327ecea144ad82.fits",
+      "preview_path": "previews/4b6bbfea90a7c31b74113eca0cbb031e3dc6b87632cfabf70b327ecea144ad82.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 3,
+        "obsid": "2026W13_2A_0017_2",
+        "wcs": {
+          "crval1": 265.557628905,
+          "crval2": -28.4628616681,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-5a844d7edaad",
+      "archive_id": "2025W17_4B_0091_2",
+      "region_id": "region-galactic-center",
+      "observation_date": "2025-04-25T08:26:31.137",
+      "ra": 268.726667,
+      "dec": 67.727903,
+      "band_number": 5,
+      "wavelength_min_um": 3.55,
+      "wavelength_max_um": 4.15,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W17_4B_0091_2",
+      "fits_path": "fits/5a844d7edaad5358b6523dedab4fd81a827a832baafd45a4c2d8ab9ae241f89e.fits",
+      "preview_path": "previews/5a844d7edaad5358b6523dedab4fd81a827a832baafd45a4c2d8ab9ae241f89e.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 5,
+        "obsid": "2025W17_4B_0091_2",
+        "wcs": {
+          "crval1": 268.726666616,
+          "crval2": 67.7279032374,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-61eb4249da9f",
+      "archive_id": "2026W28_2A_0304_3",
+      "region_id": "region-m31",
+      "observation_date": "2026-07-11T00:34:07.751",
+      "ra": 9.97443,
+      "dec": 42.751177,
+      "band_number": 4,
+      "wavelength_min_um": 2.85,
+      "wavelength_max_um": 3.45,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W28_2A_0304_3",
+      "fits_path": "fits/61eb4249da9f6e69d955e72f00170714fa8aee9285a8cf13ecc788e376f8002b.fits",
+      "preview_path": "previews/61eb4249da9f6e69d955e72f00170714fa8aee9285a8cf13ecc788e376f8002b.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 4,
+        "obsid": "2026W28_2A_0304_3",
+        "wcs": {
+          "crval1": 9.97442985763,
+          "crval2": 42.7511773054,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-753bba7ae50a",
+      "archive_id": "2026W29_1A_0193_1",
+      "region_id": "region-south-ecliptic-pole",
+      "observation_date": "2026-07-13T23:32:21.084",
+      "ra": 92.071094,
+      "dec": -67.392153,
+      "band_number": 2,
+      "wavelength_min_um": 1.45,
+      "wavelength_max_um": 2.05,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W29_1A_0193_1",
+      "fits_path": "fits/753bba7ae50a55165a381fa78fd10dd30970d7c893813b0df6a8a1a7296037f3.fits",
+      "preview_path": "previews/753bba7ae50a55165a381fa78fd10dd30970d7c893813b0df6a8a1a7296037f3.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 2,
+        "obsid": "2026W29_1A_0193_1",
+        "wcs": {
+          "crval1": 92.0710942778,
+          "crval2": -67.3921534428,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-7ae384b3305a",
+      "archive_id": "2025W17_4B_0180_3",
+      "region_id": "region-south-ecliptic-pole",
+      "observation_date": "2025-04-25T22:23:14.293",
+      "ra": 89.40052,
+      "dec": -66.954466,
+      "band_number": 5,
+      "wavelength_min_um": 3.55,
+      "wavelength_max_um": 4.15,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W17_4B_0180_3",
+      "fits_path": "fits/7ae384b3305ae943525bc54bb12035a1c743c6a152746c04710d0a360c20de55.fits",
+      "preview_path": "previews/7ae384b3305ae943525bc54bb12035a1c743c6a152746c04710d0a360c20de55.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 5,
+        "obsid": "2025W17_4B_0180_3",
+        "wcs": {
+          "crval1": 89.4005196894,
+          "crval2": -66.9544658676,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-7bfa11e92bb6",
+      "archive_id": "2025W36_2B_0423_3",
+      "region_id": "region-galactic-center",
+      "observation_date": "2025-09-06T14:44:11.775",
+      "ra": 265.561774,
+      "dec": -30.330545,
+      "band_number": 1,
+      "wavelength_min_um": 0.75,
+      "wavelength_max_um": 1.35,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W36_2B_0423_3",
+      "fits_path": "fits/7bfa11e92bb67a8dc89663799fcea044a8ec092f8e7b44d6b8e896d5f0d50625.fits",
+      "preview_path": "previews/7bfa11e92bb67a8dc89663799fcea044a8ec092f8e7b44d6b8e896d5f0d50625.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 1,
+        "obsid": "2025W36_2B_0423_3",
+        "wcs": {
+          "crval1": 265.561774077,
+          "crval2": -30.3305452046,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-81a7ebac24a0",
+      "archive_id": "2026W08_2A_0057_1",
+      "region_id": "region-pleiades",
+      "observation_date": "2026-02-19T18:27:36.638",
+      "ra": 56.157235,
+      "dec": 24.741176,
+      "band_number": 1,
+      "wavelength_min_um": 0.75,
+      "wavelength_max_um": 1.35,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W08_2A_0057_1",
+      "fits_path": "fits/81a7ebac24a068edb64dabf73db01b1b2f9a4913a0713fb61d696169c788d001.fits",
+      "preview_path": "previews/81a7ebac24a068edb64dabf73db01b1b2f9a4913a0713fb61d696169c788d001.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 1,
+        "obsid": "2026W08_2A_0057_1",
+        "wcs": {
+          "crval1": 56.1572353235,
+          "crval2": 24.7411764648,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-8232c81dcf93",
+      "archive_id": "2025W34_1B_0278_1",
+      "region_id": "region-pleiades",
+      "observation_date": "2025-08-19T10:35:53.880",
+      "ra": 57.243921,
+      "dec": 24.961068,
+      "band_number": 4,
+      "wavelength_min_um": 2.85,
+      "wavelength_max_um": 3.45,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W34_1B_0278_1",
+      "fits_path": "fits/8232c81dcf93ef5582d06138b0d2d482bd73f332e519565062362f3d77dbd4cc.fits",
+      "preview_path": "previews/8232c81dcf93ef5582d06138b0d2d482bd73f332e519565062362f3d77dbd4cc.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 4,
+        "obsid": "2025W34_1B_0278_1",
+        "wcs": {
+          "crval1": 57.2439205367,
+          "crval2": 24.9610676545,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-m31-epoch-a",
+      "archive_id": "2025W28_2A_0555_3",
+      "region_id": "region-m31",
+      "observation_date": "2025-07-13T13:28:30.140",
+      "ra": 10.097725,
+      "dec": 39.14279,
+      "band_number": 2,
+      "wavelength_min_um": 1.45,
+      "wavelength_max_um": 2.05,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W28_2A_0555_3",
+      "fits_path": "fits/8821809967fb50d2030a807d05eda7023182b7fb919654a89ac105993f617f70.fits",
+      "preview_path": "previews/8821809967fb50d2030a807d05eda7023182b7fb919654a89ac105993f617f70.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 2,
+        "obsid": "2025W28_2A_0555_3",
+        "wcs": {
+          "crval1": 10.0977247584,
+          "crval2": 39.1427898127,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-8b289d1d3fc7",
+      "archive_id": "2026W28_2A_0304_4",
+      "region_id": "region-m31",
+      "observation_date": "2026-07-11T00:36:16.681",
+      "ra": 9.86037,
+      "dec": 42.907218,
+      "band_number": 1,
+      "wavelength_min_um": 0.75,
+      "wavelength_max_um": 1.35,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W28_2A_0304_4",
+      "fits_path": "fits/8b289d1d3fc783d8e5e8c8cf331783409bb79691a0b0b7b8dfc065abede44885.fits",
+      "preview_path": "previews/8b289d1d3fc783d8e5e8c8cf331783409bb79691a0b0b7b8dfc065abede44885.webp",
+      "width": 35,
+      "height": 18,
+      "status": "available",
+      "metadata_json": {
+        "detector": 1,
+        "obsid": "2026W28_2A_0304_4",
+        "wcs": {
+          "crval1": 9.86037040193,
+          "crval2": 42.9072183525,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-8fbc6b7083da",
+      "archive_id": "2026W28_2A_0317_4",
+      "region_id": "region-galactic-center",
+      "observation_date": "2026-07-11T02:25:22.991",
+      "ra": 270.76921,
+      "dec": 66.701847,
+      "band_number": 5,
+      "wavelength_min_um": 3.55,
+      "wavelength_max_um": 4.15,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W28_2A_0317_4",
+      "fits_path": "fits/8fbc6b7083da4f75d2842a5d6bc3fdc3272b35c467d36c4b2fc6176f255d9881.fits",
+      "preview_path": "previews/8fbc6b7083da4f75d2842a5d6bc3fdc3272b35c467d36c4b2fc6176f255d9881.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 5,
+        "obsid": "2026W28_2A_0317_4",
+        "wcs": {
+          "crval1": 270.769210437,
+          "crval2": 66.7018466922,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-af52fce123aa",
+      "archive_id": "2026W12_1A_0417_1",
+      "region_id": "region-orion",
+      "observation_date": "2026-03-18T07:41:59.353",
+      "ra": 85.375599,
+      "dec": -3.976729,
+      "band_number": 1,
+      "wavelength_min_um": 0.75,
+      "wavelength_max_um": 1.35,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W12_1A_0417_1",
+      "fits_path": "fits/af52fce123aa1f53817ceb3efcb1db9abd28a1c7ae663879ad01fa24c6db64cc.fits",
+      "preview_path": "previews/af52fce123aa1f53817ceb3efcb1db9abd28a1c7ae663879ad01fa24c6db64cc.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 1,
+        "obsid": "2026W12_1A_0417_1",
+        "wcs": {
+          "crval1": 85.3755990176,
+          "crval2": -3.97672909144,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-b263ecd332a4",
+      "archive_id": "2025W36_2B_0338_3",
+      "region_id": "region-orion",
+      "observation_date": "2025-09-06T04:03:01.278",
+      "ra": 83.499946,
+      "dec": -3.677914,
+      "band_number": 4,
+      "wavelength_min_um": 2.85,
+      "wavelength_max_um": 3.45,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W36_2B_0338_3",
+      "fits_path": "fits/b263ecd332a4c6744c154402b57fa3e4b1795cb4dc8735e5fe410ac0d688a475.fits",
+      "preview_path": "previews/b263ecd332a4c6744c154402b57fa3e4b1795cb4dc8735e5fe410ac0d688a475.webp",
+      "width": 35,
+      "height": 21,
+      "status": "available",
+      "metadata_json": {
+        "detector": 4,
+        "obsid": "2025W36_2B_0338_3",
+        "wcs": {
+          "crval1": 83.4999463958,
+          "crval2": -3.67791416797,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-bf66960be02b",
+      "archive_id": "2026W11_1A_0682_4",
+      "region_id": "region-orion",
+      "observation_date": "2026-03-12T03:32:14.186",
+      "ra": 84.508651,
+      "dec": -7.115869,
+      "band_number": 5,
+      "wavelength_min_um": 3.55,
+      "wavelength_max_um": 4.15,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W11_1A_0682_4",
+      "fits_path": "fits/bf66960be02b5761ffb2a426045679e3e177a72c7a74d0e1d8b509da8a41c266.fits",
+      "preview_path": "previews/bf66960be02b5761ffb2a426045679e3e177a72c7a74d0e1d8b509da8a41c266.webp",
+      "width": 35,
+      "height": 17,
+      "status": "available",
+      "metadata_json": {
+        "detector": 5,
+        "obsid": "2026W11_1A_0682_4",
+        "wcs": {
+          "crval1": 84.5086513289,
+          "crval2": -7.11586923699,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-c020546708e8",
+      "archive_id": "2025W37_1A_0685_1",
+      "region_id": "region-orion",
+      "observation_date": "2025-09-11T09:27:07.906",
+      "ra": 84.426676,
+      "dec": -6.92687,
+      "band_number": 2,
+      "wavelength_min_um": 1.45,
+      "wavelength_max_um": 2.05,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W37_1A_0685_1",
+      "fits_path": "fits/c020546708e86d61bb84fb3fc6e0a80789adb982c740c191be9fc30ff2303ad6.fits",
+      "preview_path": "previews/c020546708e86d61bb84fb3fc6e0a80789adb982c740c191be9fc30ff2303ad6.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 2,
+        "obsid": "2025W37_1A_0685_1",
+        "wcs": {
+          "crval1": 84.4266762255,
+          "crval2": -6.9268698066,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-c07206714fd8",
+      "archive_id": "2025W34_2B_0098_3",
+      "region_id": "region-pleiades",
+      "observation_date": "2025-08-22T00:33:34.929",
+      "ra": 56.563435,
+      "dec": 25.241859,
+      "band_number": 5,
+      "wavelength_min_um": 3.55,
+      "wavelength_max_um": 4.15,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W34_2B_0098_3",
+      "fits_path": "fits/c07206714fd81b57eb89f59165eb3cf7aaeb51672a327ab06968f25202ac77fb.fits",
+      "preview_path": "previews/c07206714fd81b57eb89f59165eb3cf7aaeb51672a327ab06968f25202ac77fb.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 5,
+        "obsid": "2025W34_2B_0098_3",
+        "wcs": {
+          "crval1": 56.563434923,
+          "crval2": 25.2418585801,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-c4d3d9300362",
+      "archive_id": "2025W28_1B_0515_1",
+      "region_id": "region-m31",
+      "observation_date": "2025-07-09T19:48:48.745",
+      "ra": 10.693687,
+      "dec": 39.74907,
+      "band_number": 4,
+      "wavelength_min_um": 2.85,
+      "wavelength_max_um": 3.45,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W28_1B_0515_1",
+      "fits_path": "fits/c4d3d93003621be9b7f9394feb70a1fc79187f21bf5a2fa3490a156bb37141c6.fits",
+      "preview_path": "previews/c4d3d93003621be9b7f9394feb70a1fc79187f21bf5a2fa3490a156bb37141c6.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 4,
+        "obsid": "2025W28_1B_0515_1",
+        "wcs": {
+          "crval1": 10.6936871308,
+          "crval2": 39.749069732,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-c69347f7d4ac",
+      "archive_id": "2025W37_1A_0365_1",
+      "region_id": "region-orion",
+      "observation_date": "2025-09-09T19:59:56.976",
+      "ra": 82.832284,
+      "dec": -4.169675,
+      "band_number": 5,
+      "wavelength_min_um": 3.55,
+      "wavelength_max_um": 4.15,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W37_1A_0365_1",
+      "fits_path": "fits/c69347f7d4ac8460e43d8c51dff9b9766061a790807f666c3d5ef76aa37cf088.fits",
+      "preview_path": "previews/c69347f7d4ac8460e43d8c51dff9b9766061a790807f666c3d5ef76aa37cf088.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 5,
+        "obsid": "2025W37_1A_0365_1",
+        "wcs": {
+          "crval1": 82.8322836845,
+          "crval2": -4.16967460187,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-cc2d2231babb",
+      "archive_id": "2025W36_2B_0338_1",
+      "region_id": "region-orion",
+      "observation_date": "2025-09-06T03:58:43.417",
+      "ra": 83.523967,
+      "dec": -4.090394,
+      "band_number": 1,
+      "wavelength_min_um": 0.75,
+      "wavelength_max_um": 1.35,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W36_2B_0338_1",
+      "fits_path": "fits/cc2d2231babbe6c2a766428960bf38c45d081648527f21e2a1fc5dcc29b42238.fits",
+      "preview_path": "previews/cc2d2231babbe6c2a766428960bf38c45d081648527f21e2a1fc5dcc29b42238.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 1,
+        "obsid": "2025W36_2B_0338_1",
+        "wcs": {
+          "crval1": 83.5239674517,
+          "crval2": -4.09039407911,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-d2b7fba05a3a",
+      "archive_id": "2025W17_4B_0091_1",
+      "region_id": "region-galactic-center",
+      "observation_date": "2025-04-25T08:24:22.208",
+      "ra": 268.920839,
+      "dec": 67.527312,
+      "band_number": 2,
+      "wavelength_min_um": 1.45,
+      "wavelength_max_um": 2.05,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W17_4B_0091_1",
+      "fits_path": "fits/d2b7fba05a3a05ed6309d8173e13ac653f7d56aab7c842d8bf16ae8be8d08a62.fits",
+      "preview_path": "previews/d2b7fba05a3a05ed6309d8173e13ac653f7d56aab7c842d8bf16ae8be8d08a62.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 2,
+        "obsid": "2025W17_4B_0091_1",
+        "wcs": {
+          "crval1": 268.920838796,
+          "crval2": 67.5273122554,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-d43ea49324f1",
+      "archive_id": "2026W29_2A_0345_1",
+      "region_id": "region-galactic-center",
+      "observation_date": "2026-07-18T03:45:43.279",
+      "ra": 266.264577,
+      "dec": 65.763287,
+      "band_number": 2,
+      "wavelength_min_um": 1.45,
+      "wavelength_max_um": 2.05,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W29_2A_0345_1",
+      "fits_path": "fits/d43ea49324f147abcbf8f946dc4e64b75c79e7977d041a5c38aa3cfb5f3159ee.fits",
+      "preview_path": "previews/d43ea49324f147abcbf8f946dc4e64b75c79e7977d041a5c38aa3cfb5f3159ee.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 2,
+        "obsid": "2026W29_2A_0345_1",
+        "wcs": {
+          "crval1": 266.264576781,
+          "crval2": 65.7632866723,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-d7eec7089fd4",
+      "archive_id": "2025W36_2B_0338_2",
+      "region_id": "region-orion",
+      "observation_date": "2025-09-06T04:00:52.347",
+      "ra": 83.509193,
+      "dec": -3.894514,
+      "band_number": 1,
+      "wavelength_min_um": 0.75,
+      "wavelength_max_um": 1.35,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W36_2B_0338_2",
+      "fits_path": "fits/d7eec7089fd4898aa56b4bd79315cb41f3a9e758c88dc330473b6f9110b83195.fits",
+      "preview_path": "previews/d7eec7089fd4898aa56b4bd79315cb41f3a9e758c88dc330473b6f9110b83195.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 1,
+        "obsid": "2025W36_2B_0338_2",
+        "wcs": {
+          "crval1": 83.5091926944,
+          "crval2": -3.89451404915,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-d9bd21b6bcd3",
+      "archive_id": "2026W08_1A_0273_1",
+      "region_id": "region-pleiades",
+      "observation_date": "2026-02-17T09:27:23.295",
+      "ra": 56.745458,
+      "dec": 22.364273,
+      "band_number": 4,
+      "wavelength_min_um": 2.85,
+      "wavelength_max_um": 3.45,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W08_1A_0273_1",
+      "fits_path": "fits/d9bd21b6bcd343390ae7ff0270b8683e5f91d63f8997936d8936f3a0348b2eb1.fits",
+      "preview_path": "previews/d9bd21b6bcd343390ae7ff0270b8683e5f91d63f8997936d8936f3a0348b2eb1.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 4,
+        "obsid": "2026W08_1A_0273_1",
+        "wcs": {
+          "crval1": 56.7454580597,
+          "crval2": 22.3642734849,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-dfcae1622dff",
+      "archive_id": "2026W11_1A_0682_3",
+      "region_id": "region-orion",
+      "observation_date": "2026-03-12T03:30:05.255",
+      "ra": 84.50281,
+      "dec": -6.902332,
+      "band_number": 2,
+      "wavelength_min_um": 1.45,
+      "wavelength_max_um": 2.05,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W11_1A_0682_3",
+      "fits_path": "fits/dfcae1622dff3593c9cde879c572908b63ea7526221bf96627ee454e7bf27432.fits",
+      "preview_path": "previews/dfcae1622dff3593c9cde879c572908b63ea7526221bf96627ee454e7bf27432.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 2,
+        "obsid": "2026W11_1A_0682_3",
+        "wcs": {
+          "crval1": 84.5028098423,
+          "crval2": -6.90233170627,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-m31-epoch-b",
+      "archive_id": "2026W29_1A_0443_4",
+      "region_id": "region-m31",
+      "observation_date": "2026-07-15T07:14:12.546",
+      "ra": 9.422311,
+      "dec": 40.536019,
+      "band_number": 2,
+      "wavelength_min_um": 1.45,
+      "wavelength_max_um": 2.05,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W29_1A_0443_4",
+      "fits_path": "fits/f95042933d89c71f09ffd29725cd13a0459960ff2da230d4e230c51a9a4deeb7.fits",
+      "preview_path": "previews/f95042933d89c71f09ffd29725cd13a0459960ff2da230d4e230c51a9a4deeb7.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 2,
+        "obsid": "2026W29_1A_0443_4",
+        "wcs": {
+          "crval1": 9.42231095795,
+          "crval2": 40.5360194683,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-fabeaae1a065",
+      "archive_id": "2025W34_1B_0278_1",
+      "region_id": "region-pleiades",
+      "observation_date": "2025-08-19T10:35:53.881",
+      "ra": 57.240826,
+      "dec": 24.940408,
+      "band_number": 1,
+      "wavelength_min_um": 0.75,
+      "wavelength_max_um": 1.35,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W34_1B_0278_1",
+      "fits_path": "fits/fabeaae1a0652d9382951c11df378c8475f21e466c9ec2dea99f4ddc6be21fcb.fits",
+      "preview_path": "previews/fabeaae1a0652d9382951c11df378c8475f21e466c9ec2dea99f4ddc6be21fcb.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 1,
+        "obsid": "2025W34_1B_0278_1",
+        "wcs": {
+          "crval1": 57.2408255347,
+          "crval2": 24.9404084781,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    },
+    {
+      "id": "obs-fd5cdc6c131d",
+      "archive_id": "2025W36_2B_0338_1",
+      "region_id": "region-orion",
+      "observation_date": "2025-09-06T03:58:43.417",
+      "ra": 83.529836,
+      "dec": -4.069829,
+      "band_number": 4,
+      "wavelength_min_um": 2.85,
+      "wavelength_max_um": 3.45,
+      "archive_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2025W36_2B_0338_1",
+      "fits_path": "fits/fd5cdc6c131d16e41179a6973e9306592bf7c4255060a943736a65b6ac5d15d2.fits",
+      "preview_path": "previews/fd5cdc6c131d16e41179a6973e9306592bf7c4255060a943736a65b6ac5d15d2.webp",
+      "width": 35,
+      "height": 35,
+      "status": "available",
+      "metadata_json": {
+        "detector": 4,
+        "obsid": "2025W36_2B_0338_1",
+        "wcs": {
+          "crval1": 83.5298359149,
+          "crval2": -4.06982889247,
+          "cdelt1": -0.0017,
+          "cdelt2": 0.0017,
+          "ctype1": "RA---TAN",
+          "ctype2": "DEC--TAN"
+        },
+        "unit": "MJy/sr",
+        "quality": "nominal Level-2 calibrated"
+      }
+    }
+  ],
+  "comparisons": [
+    {
+      "id": "91e2fa3a-bab1-5ddf-bcef-2d42c98c9822",
+      "observation_a_id": "obs-m31-epoch-a",
+      "observation_b_id": "obs-m31-epoch-b",
+      "status": "completed",
+      "aligned_a_path": "differences/91e2fa3a-bab1-5ddf-bcef-2d42c98c9822-aligned-a.webp",
+      "aligned_b_path": "differences/91e2fa3a-bab1-5ddf-bcef-2d42c98c9822-aligned-b.webp",
+      "difference_path": "differences/91e2fa3a-bab1-5ddf-bcef-2d42c98c9822.webp",
+      "significance_path": "differences/91e2fa3a-bab1-5ddf-bcef-2d42c98c9822-significance.webp",
+      "summary_json": {
+        "target_name": "Andromeda Galaxy (M31)",
+        "time_interval_days": 366.7,
+        "epoch_a_date": "2025-07-13T13:28:30",
+        "epoch_b_date": "2026-07-15T07:14:12",
+        "spectral_band": 2,
+        "rms_difference": 0.042,
+        "change_count": 3,
+        "scientific_note": "Aligned via Astropy celestial WCS reprojection. Calibrated surface brightness delta (MJy/sr)."
+      }
+    },
+    {
+      "id": "c519ee3b-c8db-5d62-8001-942690880e60",
+      "observation_a_id": "obs-orion-epoch-a",
+      "observation_b_id": "obs-orion-epoch-b",
+      "status": "completed",
+      "aligned_a_path": "differences/c519ee3b-c8db-5d62-8001-942690880e60-aligned-a.webp",
+      "aligned_b_path": "differences/c519ee3b-c8db-5d62-8001-942690880e60-aligned-b.webp",
+      "difference_path": "differences/c519ee3b-c8db-5d62-8001-942690880e60.webp",
+      "significance_path": "differences/c519ee3b-c8db-5d62-8001-942690880e60-significance.webp",
+      "summary_json": {
+        "target_name": "Orion Molecular Cloud (M42)",
+        "time_interval_days": 188.3,
+        "epoch_a_date": "2025-09-09T20:02:05",
+        "epoch_b_date": "2026-03-17T02:32:55",
+        "spectral_band": 2,
+        "rms_difference": 0.058,
+        "change_count": 2,
+        "scientific_note": "Six-month baseline comparison showing protostellar infrared variability."
+      }
+    }
+  ],
+  "candidates": [
+    {
+      "id": "cand-m31-01",
+      "comparison_id": "91e2fa3a-bab1-5ddf-bcef-2d42c98c9822",
+      "x": 18.5,
+      "y": 22.0,
+      "ra": 10.0982,
+      "dec": 39.1431,
+      "change_type": "brightness_change",
+      "motion_arcsec": 0.4,
+      "brightness_change": 3.42,
+      "score": 87.5,
+      "metadata_json": {
+        "significance_sigma": 4.8,
+        "possible_class": "Variable Star / Mira Candidate",
+        "note": "Notable flux increase in Band 2 over 1-year survey cadence."
+      }
+    },
+    {
+      "id": "cand-m31-02",
+      "comparison_id": "91e2fa3a-bab1-5ddf-bcef-2d42c98c9822",
+      "x": 27.2,
+      "y": 14.8,
+      "ra": 10.0924,
+      "dec": 39.1395,
+      "change_type": "moving_object",
+      "motion_arcsec": 4.1,
+      "brightness_change": 0.85,
+      "score": 92.0,
+      "metadata_json": {
+        "significance_sigma": 5.2,
+        "possible_class": "High Proper Motion / Solar System Object",
+        "note": "Apparent coordinate shift between July 2025 and July 2026 epochs."
+      }
+    },
+    {
+      "id": "cand-orion-01",
+      "comparison_id": "c519ee3b-c8db-5d62-8001-942690880e60",
+      "x": 15.0,
+      "y": 16.5,
+      "ra": 82.8212,
+      "dec": -3.9902,
+      "change_type": "brightness_change",
+      "motion_arcsec": 0.2,
+      "brightness_change": 2.15,
+      "score": 81.0,
+      "metadata_json": {
+        "significance_sigma": 4.1,
+        "possible_class": "Young Stellar Object (YSO) Flare",
+        "note": "Accretion variation or envelope obscuration change."
+      }
+    }
+  ]
+}

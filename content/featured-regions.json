@@ -1,0 +1,57 @@
+[
+  {
+    "id": "region-m31",
+    "slug": "m31",
+    "name": "Andromeda Galaxy (M31)",
+    "description": "The nearest major galaxy to the Milky Way, located 2.5 million light-years away. SPHEREx monitors the extended disk for variable stars, nova outbursts, and dust emission shifts across 6-month survey passes.",
+    "ra": 10.098,
+    "dec": 39.143,
+    "radius_deg": 0.25,
+    "is_featured": true,
+    "highlight": "Repeat observations from July 2025 and July 2026 showing stellar stability and variable sources."
+  },
+  {
+    "slug": "orion",
+    "id": "region-orion",
+    "name": "Orion Nebula & Molecular Cloud (M42)",
+    "description": "One of the most active star-forming regions in the local Milky Way. Dense molecular gas, young protostars, and outflow shocks exhibit infrared temporal variations between SPHEREx passes.",
+    "ra": 82.821,
+    "dec": -3.990,
+    "radius_deg": 0.25,
+    "is_featured": true,
+    "highlight": "Multi-epoch observations from September 2025 and March 2026 revealing photometric variability in protostellar candidates."
+  },
+  {
+    "slug": "pleiades",
+    "id": "region-pleiades",
+    "name": "Pleiades Cluster (M45)",
+    "description": "An open star cluster in Taurus containing over 1,000 confirmed stars. Ideal baseline for photometric cross-calibration and tracking fast-moving solar system objects crossing the ecliptic lane.",
+    "ra": 56.655,
+    "dec": 24.840,
+    "radius_deg": 0.25,
+    "is_featured": true,
+    "highlight": "Six-month cadence survey passes from August 2025 and February 2026."
+  },
+  {
+    "slug": "galactic-center",
+    "id": "region-galactic-center",
+    "name": "Galactic Center & Bulge",
+    "description": "The heart of the Milky Way, obscured in visible light by dust but transparent in SPHEREx near-infrared wavelengths. Contains extreme stellar densities, variable Mira stars, and transient infrared flares.",
+    "ra": 266.185,
+    "dec": -28.153,
+    "radius_deg": 0.25,
+    "is_featured": true,
+    "highlight": "Comparing August 2025 and March 2026 near-infrared epochs through deep dust lanes."
+  },
+  {
+    "slug": "south-ecliptic-pole",
+    "id": "region-south-ecliptic-pole",
+    "name": "South Ecliptic Pole Deep Field",
+    "description": "SPHEREx deep survey convergence zone near the ecliptic pole, visited frequently on every orbital revolution. Yields high signal-to-noise ratio measurements for faint brown dwarfs and distant galaxies.",
+    "ra": 90.015,
+    "dec": -66.621,
+    "radius_deg": 0.25,
+    "is_featured": true,
+    "highlight": "Multi-pass integration with repeat observations between April 2025 and July 2026."
+  }
+]

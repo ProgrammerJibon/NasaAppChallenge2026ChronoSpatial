@@ -1,0 +1,34 @@
+{
+  "name": "spherex-sky-change-explorer",
+  "version": "1.0.0",
+  "description": "NASA SPHEREx Sky Change Explorer — Chrono & Spatial platform for multi-epoch celestial comparison",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "verify:structure": "node scripts/verify-structure.mjs",
+    "test:next": "npm --prefix next test",
+    "test:server": "npm --prefix server test",
+    "test:python": "python -m pytest python/tests",
+    "test": "npm run test:next && npm run test:server && npm run test:python",
+    "typecheck:next": "npm --prefix next run typecheck",
+    "typecheck:server": "npm --prefix server run build",
+    "typecheck": "npm run typecheck:next && npm run typecheck:server",
+    "build:server": "npm --prefix server run build",
+    "build:next": "npm --prefix next run build",
+    "build": "npm run build:server && npm run build:next",
+    "clean": "node scripts/clean-generated.mjs",
+    "verify": "npm run verify:structure && npm run test && npm run build"
+  },
+  "keywords": [
+    "nasa",
+    "space-apps-challenge",
+    "spherex",
+    "astronomy",
+    "astropy",
+    "nextjs",
+    "express",
+    "change-detection"
+  ],
+  "author": "Team A-JINX (Barisal, Bangladesh)",
+  "license": "MIT"
+}

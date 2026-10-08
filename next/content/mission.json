@@ -1,0 +1,37 @@
+{
+  "name": "SPHEREx",
+  "fullName": "Spectro-Photometer for the History of the Universe, Epoch of Reionization, and Ices Explorer",
+  "agency": "NASA / JPL-Caltech",
+  "launchYear": 2025,
+  "cadence": "Approximately 6 months per full-sky survey",
+  "channels": 102,
+  "wavelengthRange": "0.75 µm to 5.0 µm",
+  "detectors": 6,
+  "challengeTitle": "Planet X and SPHEREx Sky Change Explorer",
+  "challengeDescription": "SPHEREx surveys the entire sky every six months in 102 near-infrared bands. Comparing observations taken months apart reveals the dynamic universe: moving asteroids and comets, variable stars, brown dwarfs, transients, and planetary candidates.",
+  "archive": {
+    "source": "NASA/IPAC Infrared Science Archive (IRSA)",
+    "collections": ["spherex_qr3", "spherex_qr3_deep", "spherex_qr2"],
+    "level": "Level-2 calibrated single-exposure spectral images (FITS)"
+  },
+  "scientificPrinciples": [
+    {
+      "title": "Detector Bands vs 102 Spectral Channels",
+      "body": "SPHEREx uses 6 detector arrays equipped with Linear Variable Filters (LVFs). Wavelength varies continuously across the detector field of view rather than being 102 distinct physical filters. Each Level-2 image records a slice of this spectral variation."
+    },
+    {
+      "title": "Strict Temporal Comparability",
+      "body": "Valid change detection requires reprojecting onto a common celestial WCS and verifying wavelength compatibility (within 2%) before subtracting flux. CSS opacity blending is not scientific difference imaging."
+    },
+    {
+      "title": "Candidate vs Discovery",
+      "body": "Automated difference and significance algorithms detect statistical outliers (DAOStarFinder). Resampling noise, bad pixels, and PSF variations produce artifacts. A candidate is never a confirmed discovery without human verification."
+    }
+  ],
+  "stats": [
+    { "label": "Full-Sky Surveys", "value": "4", "suffix": "Passes Planned" },
+    { "label": "Spectral Bands", "value": "102", "suffix": "Channels (0.75-5.0 µm)" },
+    { "label": "Cadence", "value": "6", "suffix": "Months per Pass" },
+    { "label": "Galaxies & Stars", "value": "450M+", "suffix": "All-Sky Sources" }
+  ]
+}

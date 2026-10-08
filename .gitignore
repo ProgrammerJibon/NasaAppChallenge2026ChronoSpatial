@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js Build
+next/.next/
+next/out/
+
+# Server Build
+server/dist/
+
+# Python Cache & Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+venv/
+.venv/
+env/
+.env
+
+# Environment & Local Secrets
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+server/.env
+
+# Temporary and Cache Storage (keep demo assets!)
+storage/cache/*
+!storage/cache/.gitkeep
+storage/logs/*
+!storage/logs/.gitkeep
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
