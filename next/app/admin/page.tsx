@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { MissionWorkspace } from "@/components/mission/MissionWorkspace";
 import { api, ApiError } from "@/lib/api";
 import type { ProcessingJob } from "@/lib/types";
 import { formatDate } from "@/lib/format";
@@ -48,7 +49,7 @@ interface StorageStatus {
   directories: Record<string, { bytes: number; human: string }>;
 }
 
-export default function AdminPage() {
+function AdminConsole() {
   const [token, setToken] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -552,4 +553,8 @@ export default function AdminPage() {
       </section>
     </div>
   );
+}
+
+export default function AdminPage() {
+  return <MissionWorkspace title="Mission control." subtitle="Project tools for the people who maintain the platform." scene="planet" welcome="This area is for maintainers. Explore, Timeline, and Compare are available without signing in." topics={[{label:"Do I need to sign in?",keywords:["sign","login","account"],answer:"Only to use these maintenance controls. Sky exploration and review do not need an account."},{label:"What is a job?",keywords:["job","queue"],answer:"A job is a background task, such as preparing a comparison. Its status tells you whether it is waiting, running, finished, or failed."},{label:"What does retry do?",keywords:["retry","failed"],answer:"Retry puts a failed task back in the queue. It does not guarantee success; check the task’s error first."}]}><div className="compact-admin"><AdminConsole/></div></MissionWorkspace>;
 }

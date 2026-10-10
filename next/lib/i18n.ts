@@ -25,6 +25,25 @@ export const LANGUAGES: LanguageInfo[] = [
 
 export const TRANSLATIONS: Record<Language, Record<string, string>> = {
   en: {
+    curatedRegions: "Curated sky regions",
+    openTimeline: "Open timeline",
+    launchCompare: "Compare observations",
+    featuredObservation: "Featured observation",
+    loadingObservation: "Loading observation…",
+    openInViewer: "Open observation",
+    missionWavelengths: "Mission spectral channels",
+    monthsWord: "months",
+    loadedObservations: "Observations in this archive",
+    startJourney: "YOUR WINDOW INTO THE COSMOS",
+    howItWorks: "The science behind it",
+    chooseDestination: "PICK A PATCH OF SKY",
+    observationsWord: "observations",
+    reviewHonestDescription: "A second pair of eyes can make a difference. Explore demonstration candidates, compare observations, and contribute your assessment. Candidates need scientific follow-up before confirmation.",
+    exploreKicker: "01 / SPATIAL EXPLORATION",
+    timelineKicker: "02 / TEMPORAL EXPLORATION",
+    compareKicker: "03 / CHANGE INSPECTION",
+    reviewKicker: "04 / COMMUNITY REVIEW",
+
     // Navigation & Common
     home: "Home",
     explore: "Explore Sky",
@@ -43,9 +62,9 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
 
     // Hero Section
     heroBadge: "NASA SPHEREx Mission Survey Explorer",
-    heroTitlePrefix: "Watch the Universe",
-    heroTitleHighlight: "Change Across Time",
-    heroDesc: "NASA's SPHEREx maps the entire sky every six months in 102 near-infrared wavelength channels. Step through repeat observations to discover variable stars, moving solar system bodies, and transient cosmic phenomena.",
+    heroTitlePrefix: "A universe to explore.",
+    heroTitleHighlight: "A story in every change.",
+    heroDesc: "Explore NASA’s infrared sky. Travel between observations, compare the same field across time, and investigate the changes hiding in plain sight.",
     heroExploreBtn: "Explore the Sky",
     heroCompareBtn: "Watch It Change",
     heroTrustBadge: "Calibrated Level-2 FITS imagery from NASA/IPAC IRSA archive",
@@ -60,15 +79,15 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
 
     // 3-Step Workflow
     workflowTitle: "How to Explore Sky Changes",
-    workflowSub: "A reliable 3-step workflow designed to spot astronomical motion and brightness changes in seconds.",
+    workflowSub: "From a patch of sky to a closer look. Follow the observations, one step at a time.",
     step1Title: "Find a Sky Region",
     step1Desc: "Search by object name (Andromeda, Orion, Pleiades) or enter exact celestial coordinates (RA/Dec) to find all observation epochs.",
     step1Btn: "Start exploring",
     step2Title: "Time Travel the Cadence",
-    step2Desc: "Play animated sequences across SPHEREx's 6-month survey passes. Watch the same patch of space animate chronologically.",
+    step2Desc: "Step through the available dates in a matching detector band. Play, pause, and explore the sequence at your own pace.",
     step2Btn: "Open Timeline",
     step3Title: "Compare & Inspect",
-    step3Desc: "Compare any two dates using Swipe, Blink, or scientific WCS Flux Difference maps generated from genuine FITS products.",
+    step3Desc: "Inspect compatible observations with swipe, blink, and aligned scientific difference maps.",
     step3Btn: "Launch Compare",
 
     // Featured Regions
@@ -96,7 +115,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
 
     // Timeline Page
     timelineHeading: "Cadence Timeline Player",
-    timelineSub: "Watch how a single patch of the universe evolves across successive 6-month survey passes.",
+    timelineSub: "Explore the available observation dates in a matching detector band. Play the sequence or inspect each epoch.",
     speedLabel: "Speed",
     loopLabel: "Loop",
     crossfadeLabel: "Crossfade",
@@ -124,7 +143,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
 
     // Review Page
     reviewHeading: "Citizen Science Classification",
-    reviewSub: "Help astronomers confirm whether newly detected celestial anomalies are genuine discoveries.",
+    reviewSub: "Inspect demonstration candidates and share your assessment of possible changes.",
     privacyBadge: "No Login Required · Privacy Preserved",
     classifyAs: "Classify Candidate:",
     transient: "Transient",
@@ -179,7 +198,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     helpVerifyChanges: "Help Verify Candidate Changes",
     helpVerifyDesc: "No single astronomer can review 450M sources. Join the community effort to classify moving asteroid candidates, variable stars, and flare events in SPHEREx imagery.",
     curatedRegionsTitle: "Curated Sky Regions",
-    curatedRegionsSub: "Guaranteed real SPHEREx multi-epoch datasets ready for immediate inspection.",
+    curatedRegionsSub: "Browse the fields available in the local observation archive. Each image keeps its original metadata.",
     stepLabel: "Step",
     viewOnNasaPortal: "View on NASA Space Apps Portal",
     nasaVerified: "NASA Space Apps 2026",

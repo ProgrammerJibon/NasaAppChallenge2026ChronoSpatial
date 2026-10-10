@@ -8,13 +8,15 @@ import { RiContrastLine } from "react-icons/ri";
 export interface DifferenceViewProps {
   comparisonId: string;
   hasSignificance?: boolean;
+  initialMode?: "difference" | "significance";
 }
 
 export function DifferenceView({
   comparisonId,
   hasSignificance = true,
+  initialMode = "difference",
 }: DifferenceViewProps) {
-  const [viewMode, setViewMode] = useState<"difference" | "significance">("difference");
+  const [viewMode, setViewMode] = useState<"difference" | "significance">(initialMode === "significance" && hasSignificance ? "significance" : "difference");
 
   const imageUrl = api.getComparisonFileUrl(comparisonId, viewMode);
 
@@ -80,9 +82,7 @@ export function DifferenceView({
         </div>
         <div className="h-3 rounded-full bg-gradient-to-r from-blue-600 via-slate-950 to-red-600 border border-slate-700/80" />
         <p className="text-[11px] text-slate-400 leading-relaxed">
-          Generated via pixel-by-pixel Astropy celestial WCS reprojection and additive background subtraction.
-          Red regions indicate sources with higher flux in Epoch B (new transients, flared protostars).
-          Blue regions indicate faded sources or fast motion departure.
+          Red: brighter in the second observation. Blue: fainter. Noise, masks, and alignment errors can also create differences.
         </p>
       </div>
     </div>

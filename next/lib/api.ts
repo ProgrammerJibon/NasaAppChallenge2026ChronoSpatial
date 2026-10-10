@@ -119,8 +119,8 @@ export const api = {
 
   getComparison: (id: string) => request<Comparison>(`/comparisons/${id}`),
 
-  getNextReview: (visitorId?: string) =>
-    request<ReviewItem>("/review/next", {
+  getNextReview: (visitorId?: string, excludedIds: string[] = []) =>
+    request<ReviewItem>(`/review/next${excludedIds.length ? `?exclude=${encodeURIComponent(excludedIds.join(","))}` : ""}`, {
       headers: visitorId ? { "x-visitor-id": visitorId } : {},
     }),
 

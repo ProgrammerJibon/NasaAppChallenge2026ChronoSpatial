@@ -1,147 +1,22 @@
-import React from "react";
-import { RiExternalLinkLine, RiShieldCheckLine, RiAlertLine } from "react-icons/ri";
-
+"use client";
+import { useState } from "react";
+import { RiGlobalLine, RiTimeLine, RiRainbowLine } from "react-icons/ri";
+import { MissionWorkspace, ScienceDetails } from "@/components/mission/MissionWorkspace";
 export default function AboutPage() {
-  return (
-    <div className="max-w-4xl mx-auto space-y-12 py-4">
-      {/* Page Title */}
-      <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-950/60 border border-sky-800/60 text-sky-400 text-xs font-mono">
-          <span>Mission · Scientific Methodology · Archive Details</span>
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-          About SPHEREx & Chrono-Spatial
-        </h1>
-        <p className="text-base text-slate-300 leading-relaxed">
-          Understanding NASA&apos;s all-sky spectroscopic explorer, survey cadences, and how we compare cosmic epochs scientifically.
-        </p>
-      </div>
-
-      {/* 1. Challenge & Mission Overview */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-bold text-white tracking-tight border-b border-slate-800 pb-2">
-          The SPHEREx Mission
-        </h2>
-        <p className="text-sm text-slate-300 leading-relaxed">
-          The <strong>Spectro-Photometer for the History of the Universe, Epoch of Reionization, and Ices Explorer (SPHEREx)</strong> is
-          a NASA Medium-Class Explorer (MIDEX) mission designed to survey the entire sky four times over a nominal two-year mission.
-          Every six months, SPHEREx covers 99%+ of the sky, delivering comprehensive spectral data across near-infrared wavelengths from 0.75 µm to 5.0 µm.
-        </p>
-        <p className="text-sm text-slate-300 leading-relaxed">
-          Because SPHEREx repeats its all-sky survey every six months, astronomical objects that change brightness (such as pulsating variable stars, protostellar flares, or novae)
-          or move across the sky (such as Near-Earth Asteroids, Main-Belt Asteroids, Comets, and High Proper Motion Brown Dwarfs)
-          reveal themselves when two observation epochs are compared.
-        </p>
-      </section>
-
-      {/* 2. The 102 Spectral Channels Rule */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-bold text-white tracking-tight border-b border-slate-800 pb-2">
-          The 102 Spectral Channels vs Detector Bands
-        </h2>
-        <div className="p-5 rounded-2xl bg-indigo-950/20 border border-indigo-800/40 space-y-3 text-sm text-slate-300">
-          <p className="leading-relaxed">
-            <strong className="text-white">Scientific Rule:</strong> It is crucial not to pretend that every archived image product is one of 102 fixed image files.
-          </p>
-          <p className="leading-relaxed text-xs text-slate-400">
-            SPHEREx utilizes six detector arrays (numbered 1 through 6), each topped with Linear Variable Filters (LVFs).
-            In an LVF, the wavelength transmitted varies continuously across the physical detector array.
-            As the satellite slews across the sky, different parts of the detector observe astronomical targets at slightly different wavelengths.
-          </p>
-          <p className="leading-relaxed text-xs text-slate-400">
-            The mission concept yields 102 spectral channels across the 0.75 – 5.0 µm range when multiple exposures are reconstructed.
-            Each Level-2 single-exposure FITS product represents an image slice from one of the six detector bands with an accompanying WCS-WAVE calibration lookup table.
-            Our explorer accurately retains and reflects this real archive structure.
-          </p>
-        </div>
-      </section>
-
-      {/* 3. Scientific Difference & Significance Maps */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-bold text-white tracking-tight border-b border-slate-800 pb-2">
-          Scientific Difference Imaging vs Visual Blending
-        </h2>
-        <p className="text-sm text-slate-300 leading-relaxed">
-          In casual web apps, &ldquo;change comparison&rdquo; is often mocked up using CSS opacity transitions or color blending.
-          In <strong>Chrono & Spatial</strong>, difference maps are computed on the backend science worker using Astropy and SciPy:
-        </p>
-        <ul className="list-disc list-inside space-y-2 text-xs text-slate-300 pl-2">
-          <li>
-            <strong>Celestial WCS Alignment:</strong> Observation B is interpolated onto the astrometric World Coordinate System (WCS) grid of Observation A using bilinear reprojection.
-          </li>
-          <li>
-            <strong>Wavelength Compatibility:</strong> Pixels are only compared when their calibrated central wavelength matches within 2%.
-          </li>
-          <li>
-            <strong>Additive Background Matching:</strong> The local zodiacal and instrumental background is estimated via sigma-clipped statistics and subtracted, preserving true calibrated surface brightness deltas in MJy/sr.
-          </li>
-          <li>
-            <strong>Significance Mapping (\(\sigma\)):</strong> The flux difference is divided by the quadrature sum of pixel variances to produce a statistical significance map in units of standard deviations.
-          </li>
-        </ul>
-      </section>
-
-      {/* 4. Candidate vs Confirmation Disclaimer */}
-      <section className="space-y-3 p-5 rounded-2xl bg-amber-950/20 border border-amber-800/40 text-xs text-amber-200/90 leading-relaxed">
-        <div className="flex items-center gap-2 font-bold text-amber-300 text-sm">
-          <RiAlertLine className="w-5 h-5 text-amber-400" />
-          <span>Important Notice: A Candidate is Not Confirmation</span>
-        </div>
-        <p>
-          Automated point-source detection algorithms (such as photutils DAOStarFinder) isolate statistical anomalies.
-          However, detector cosmic rays, unmasked bad pixels, satellite jitter, and point-spread function (PSF) variations between filter bands can create spurious artifacts.
-          No automated detection in this tool claims to be a confirmed discovery without independent astronomical verification and spectroscopic confirmation.
-        </p>
-      </section>
-
-      {/* 5. Provenance & Official Resources */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-bold text-white tracking-tight border-b border-slate-800 pb-2">
-          Data Provenance & Links
-        </h2>
-        <p className="text-xs text-slate-400 leading-relaxed">
-          All FITS images and spatial metadata are provided courtesy of the NASA/IPAC Infrared Science Archive (IRSA),
-          funded by the National Aeronautics and Space Administration.
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-          <a
-            href="https://irsa.ipac.caltech.edu"
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center justify-between p-3.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs text-slate-200 hover:text-white transition"
-          >
-            <span>NASA/IPAC IRSA Archive</span>
-            <RiExternalLinkLine className="text-slate-400" />
-          </a>
-          <a
-            href="https://spherex.caltech.edu"
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center justify-between p-3.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs text-slate-200 hover:text-white transition"
-          >
-            <span>SPHEREx Caltech Mission Site</span>
-            <RiExternalLinkLine className="text-slate-400" />
-          </a>
-          <a
-            href="https://www.spaceappschallenge.org"
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center justify-between p-3.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs text-slate-200 hover:text-white transition"
-          >
-            <span>NASA Space Apps Challenge</span>
-            <RiExternalLinkLine className="text-slate-400" />
-          </a>
-          <a
-            href="https://heasarc.gsfc.nasa.gov/docs/fcg/standard_dict.html"
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center justify-between p-3.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs text-slate-200 hover:text-white transition"
-          >
-            <span>FITS Standard Definition</span>
-            <RiExternalLinkLine className="text-slate-400" />
-          </a>
-        </div>
-      </section>
+  const [tab,setTab]=useState('mission');
+  const tabs=[['mission','The mission'],['method','How comparisons work'],['data','Data & sources']];
+  return <MissionWorkspace title="Meet SPHEREx." subtitle="An infrared view of the whole sky, again and again." scene="galaxy" welcome="Think of SPHEREx as a sky surveyor. It observes light our eyes cannot see, and revisits the sky over time." topics={[
+    {label:'Why infrared?',keywords:['infrared','light','eyes'],answer:'Infrared light is invisible to our eyes. It helps scientists study cool objects, dust, and the light from stars and galaxies.'},
+    {label:'How often does it return?',keywords:['often','return','months','repeat'],answer:'SPHEREx maps the sky about every six months. A specific pair in this app may be separated by a different interval.'},
+    {label:'Explain the comparison',keywords:['compare','comparison','method'],answer:'We align compatible images, estimate their backgrounds, then subtract them to highlight possible brightness changes.',action:()=>setTab('method')},
+    {label:'Where does the data come from?',keywords:['data','source','archive'],answer:'The observation archive is NASA/IPAC IRSA. Individual images retain their archive ID and source link.',action:()=>setTab('data')}
+  ]}>
+    <div className="mission-tabs" role="tablist" aria-label="Mission topics">{tabs.map(([id,label])=><button type="button" role="tab" id={`about-tab-${id}`} aria-controls={`about-panel-${id}`} aria-selected={tab===id} key={id} onClick={()=>setTab(id)}>{label}</button>)}</div>
+    <div role="tabpanel" id={`about-panel-${tab}`} aria-labelledby={`about-tab-${tab}`}>
+      {tab==='mission' && <><div className="fact-grid"><div className="fact-card"><RiGlobalLine/><strong>Whole sky</strong><p>A survey of stars, galaxies, and other infrared sources.</p></div><div className="fact-card"><RiRainbowLine/><strong>102 colors</strong><p>102 infrared wavelength channels reveal different information.</p></div><div className="fact-card"><RiTimeLine/><strong>~6 months</strong><p>The approximate interval between all-sky surveys.</p></div></div><div className="mission-copy-card mt-5"><h2>Why compare dates?</h2><p>Some objects move. Others get brighter or fainter. Repeat observations help us look for those changes.</p></div></>}
+      {tab==='method' && <div className="method-steps">{[['01','Match the images','Choose the same field, compatible wavelengths, and different dates.'],['02','Align the sky','Place the second image onto the first image’s sky-coordinate grid.'],['03','Look for a difference','Compare brightness, then check whether the difference is stronger than estimated noise.']].map(([number,title,text])=><div key={number}><span>{number}</span><div><h2>{title}</h2><p>{text}</p></div></div>)}</div>}
+      {tab==='data' && <div className="source-links"><a href="https://irsa.ipac.caltech.edu/" target="_blank" rel="noreferrer"><strong>NASA/IPAC IRSA ↗</strong><span>The observation archive</span></a><a href="https://spherex.caltech.edu/" target="_blank" rel="noreferrer"><strong>SPHEREx mission ↗</strong><span>Official mission information</span></a><a href="https://www.spaceappschallenge.org/" target="_blank" rel="noreferrer"><strong>NASA Space Apps ↗</strong><span>The challenge behind this project</span></a></div>}
     </div>
-  );
+    <ScienceDetails title="The science, in more detail"><p>SPHEREx observes roughly 0.75–5.0 µm using six detector arrays with linear variable filters. Its 102 spectral channels are reconstructed across observations; they are not 102 separate full-sky image files.</p><p>The worker uses WCS coordinates and bilinear interpolation, sigma-clipped background estimates, and a brightness difference divided by propagated uncertainty. Where variance is missing, the worker estimates background noise.</p><p>The interface selects pairs with central wavelengths within 2%. This is an observation-level check, not a full pixel-level wavelength calibration.</p><p>Artifacts, masks, and resampling can mimic changes. A candidate requires further analysis before confirmation.</p></ScienceDetails>
+  </MissionWorkspace>;
 }
