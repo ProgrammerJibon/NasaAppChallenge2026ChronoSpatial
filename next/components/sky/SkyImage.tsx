@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { RiImageLine } from "react-icons/ri";
@@ -27,9 +27,11 @@ export function SkyImage({
 
   const imageUrl = src || (observationId ? api.getPreviewUrl(observationId) : "");
 
+  useEffect(() => { setLoading(Boolean(imageUrl)); setError(false); }, [imageUrl]);
+
   return (
     <div className={`relative overflow-hidden bg-black flex items-center justify-center select-none ${className}`}>
-      {loading && (
+      {loading && imageUrl && (
         <Skeleton className="absolute inset-0 w-full h-full z-10" />
       )}
 

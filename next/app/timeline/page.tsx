@@ -1,199 +1,33 @@
 "use client";
-
-import React, { useState, useEffect, Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { api, ApiError } from "@/lib/api";
-import type { Observation, SkyRegion } from "@/lib/types";
+import { MissionWorkspace, ScienceDetails } from "@/components/mission/MissionWorkspace";
 import { TimelinePlayer } from "@/components/timeline/TimelinePlayer";
-import { RegionSelector } from "@/components/sky/RegionSelector";
-import { BandSelector } from "@/components/sky/BandSelector";
-import { ErrorState } from "@/components/ui/ErrorState";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { BeginnerExplainer } from "@/components/ui/BeginnerExplainer";
-import { useLanguage } from "@/lib/i18n";
-import {
-  RiTimeLine,
-  RiInformationLine,
-  RiSparklingLine,
-  RiContrast2Line,
-  RiCompass3Line,
-} from "react-icons/ri";
-
+import { ErrorState } from "@/components/ui/ErrorState";
+import { useSkyArchive } from "@/hooks/useSkyArchive";
+import { findEpochPair } from "@/lib/observationPairs";
+import { shortFieldName } from "@/lib/skyFields";
+import { formatWavelength } from "@/lib/format";
 function TimelineContent() {
-  const { t } = useLanguage();
-  const searchParams = useSearchParams();
-
-  const [regions, setRegions] = useState<SkyRegion[]>([]);
-  const [selectedRegion, setSelectedRegion] = useState<SkyRegion | null>(null);
-  const [observations, setObservations] = useState<Observation[]>([]);
-  const [selectedBand, setSelectedBand] = useState<number | null>(null);
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function init() {
-      try {
-        setLoading(true);
-        setError(null);
-        const [regList, bs] = await Promise.all([
-          api.getRegions(),
-          api.getBootstrap(),
-        ]);
-        setRegions(regList);
-
-        const regionSlug = searchParams.get("region") || "m31";
-        const activeRegion = regList.find((r) => r.slug === regionSlug) || bs.featuredRegion || regList[0];
-        setSelectedRegion(activeRegion);
-
-        const obsRes = await api.listObservations({
-          regionId: activeRegion.id,
-          limit: 100,
-        });
-        setObservations(obsRes.observations);
-      } catch (err: any) {
-        setError(err instanceof ApiError ? err.message : "Failed to load timeline observations.");
-      } finally {
-        setLoading(false);
-      }
-    }
-    init();
-  }, [searchParams]);
-
-  const handleSelectRegion = async (region: SkyRegion) => {
-    setSelectedRegion(region);
-    setLoading(true);
-    try {
-      const res = await api.listObservations({
-        regionId: region.id,
-        band: selectedBand ?? undefined,
-        limit: 100,
-      });
-      setObservations(res.observations);
-    } catch (err: any) {
-      setError(err.message || "Failed to load observations for region");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSelectBand = async (band: number | null) => {
-    setSelectedBand(band);
-    if (!selectedRegion) return;
-    setLoading(true);
-    try {
-      const res = await api.listObservations({
-        regionId: selectedRegion.id,
-        band: band ?? undefined,
-        limit: 100,
-      });
-      setObservations(res.observations);
-    } catch (err: any) {
-      setError(err.message || "Failed to filter timeline observations");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (error) {
-    return (
-      <ErrorState
-        title="Timeline data unavailable"
-        message={error}
-        onRetry={() => window.location.reload()}
-      />
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-6">
-      {/* Header bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-md">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <RiTimeLine className="text-sky-400 w-5 h-5" />
-            <h1 className="text-xl font-bold text-white tracking-tight">
-              {t("timelineHeading")}
-            </h1>
-          </div>
-          <p className="text-xs text-slate-400">
-            {t("timelineSub")}
-          </p>
-        </div>
-
-        {/* Region & Band Selectors */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-          <RegionSelector
-            regions={regions}
-            selectedSlug={selectedRegion?.slug}
-            onSelect={handleSelectRegion}
-          />
-          <BandSelector
-            selectedBand={selectedBand}
-            onSelectBand={handleSelectBand}
-          />
-        </div>
-      </div>
-
-      {/* Beginner Explainer */}
-      <BeginnerExplainer
-        pageTitle={t("timelineHeading")}
-        pagePurpose={t("timelineSub")}
-        items={[
-          {
-            icon: <RiTimeLine className="w-4 h-4 text-sky-400" />,
-            term: t("epochTitle"),
-            definition: t("epochDesc"),
-          },
-          {
-            icon: <RiSparklingLine className="w-4 h-4 text-amber-400" />,
-            term: t("speedLabel"),
-            definition: t("statCadence"),
-          },
-          {
-            icon: <RiContrast2Line className="w-4 h-4 text-purple-400" />,
-            term: t("crossfadeLabel"),
-            definition: t("differenceDesc"),
-          },
-          {
-            icon: <RiCompass3Line className="w-4 h-4 text-cyan-400" />,
-            term: t("comparePair"),
-            definition: t("step3Desc"),
-          },
-        ]}
-      />
-
-      {/* Main Timeline Stage */}
-      {loading ? (
-        <Skeleton className="w-full h-[600px] rounded-3xl" />
-      ) : observations.length > 0 ? (
-        <TimelinePlayer observations={observations} />
-      ) : (
-        <div className="p-12 text-center text-slate-400 bg-slate-900/40 rounded-3xl border border-slate-800">
-          No repeat epochs found for this region/band combination.
-        </div>
-      )}
-
-      {/* Methodology info */}
-      <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-900/40 border border-slate-800 text-xs text-slate-400 leading-relaxed">
-        <RiInformationLine className="w-5 h-5 text-sky-400 flex-shrink-0 mt-0.5" />
-        <div>
-          <span className="text-slate-200 font-semibold block mb-0.5">
-            Spatial Stability & Survey Cadence
-          </span>
-          The image stage is fixed to the celestial coordinate center of the target field.
-          SPHEREx surveys each ecliptic region approximately every six months. As you play or step through epochs,
-          fast-moving solar system objects will translate across adjacent pixels, while variable stars will pulsate in brightness.
-        </div>
-      </div>
-    </div>
-  );
+  const archive=useSkyArchive(), params=useSearchParams();
+  const [slug,setSlug]=useState(params.get('region')??'m31'), [requestedBand,setRequestedBand]=useState<number|null>(null), [details,setDetails]=useState(false);
+  useEffect(()=>{setSlug(params.get('region')??'m31');setRequestedBand(null);},[params]);
+  const region=archive.regions.find(r=>r.slug===slug)??archive.regions[0];
+  const fieldImages=archive.observations.filter(o=>o.region_id===region?.id);
+  const bestPair=findEpochPair(fieldImages);
+  const band=requestedBand??bestPair?.[0].band_number??fieldImages[0]?.band_number;
+  const images=fieldImages.filter(o=>o.band_number===band);
+  const name=region ? shortFieldName(region) : 'this field';
+  return <MissionWorkspace title="Let's travel through time." subtitle="Press play to step through the available dates." scene="galaxy" welcome="The same sky can look different on another day. I've chosen a matching infrared band for you." context={images.length ? `${name} · ${images.length} dates · Band ${band}` : undefined} topics={[
+    {label:'How do I start?',keywords:['start','play','watch'],answer:'Press play beneath the image, or use the arrows to change one date at a time.'},
+    {label:'Why the same band?',keywords:['band','wavelength','same'],answer:'Different wavelengths can change how an object looks. Matching bands makes a time comparison more meaningful.'},
+    {label:'Is that real movement?',keywords:['move','movement','change'],answer:'Not necessarily. These previews are not aligned pixel by pixel. Open Compare to inspect aligned images before drawing a conclusion.'},
+    {label:'Show scientific details',keywords:['science','details','dates'],answer:'The labels show the actual dates and wavelength range. The interval is not always six months.',action:()=>setDetails(true)}
+  ]}>
+    <div className="field-choices" role="group" aria-label="Choose timeline field">{archive.regions.map(field=><button type="button" key={field.id} aria-pressed={field.id===region?.id} onClick={()=>{setSlug(field.slug);setRequestedBand(null);}}>{shortFieldName(field)}</button>)}</div>
+    {archive.error ? <ErrorState title="The timeline could not load" message="Try loading the archive again." onRetry={archive.retry}/> : archive.loading ? <Skeleton className="h-[420px] rounded-2xl"/> : images.length ? <div className="timeline-simplified"><TimelinePlayer key={`${region?.id}-${band}`} observations={images}/></div> : <div className="mission-empty">No images are available here yet. Try another field.</div>}
+    <ScienceDetails open={details} onToggle={setDetails}><label className="simple-select">Infrared band<select aria-label="Timeline infrared band" value={band??''} onChange={event=>setRequestedBand(Number(event.target.value))}>{Array.from(new Set(fieldImages.map(o=>o.band_number))).sort().map(value=><option key={value} value={value}>Band {value}</option>)}</select></label><p>SPHEREx repeats its sky survey about every six months. These images show the dates available in this archive.</p>{images[0] && <p>Wavelength: {formatWavelength(images[0].wavelength_min_um,images[0].wavelength_max_um)}. Visual playback is not astrometric alignment.</p>}</ScienceDetails>
+  </MissionWorkspace>;
 }
-
-export default function TimelinePage() {
-  return (
-    <Suspense fallback={<Skeleton className="w-full h-96 rounded-3xl" />}>
-      <TimelineContent />
-    </Suspense>
-  );
-}
+export default function TimelinePage() {return <Suspense fallback={<Skeleton className="h-96 rounded-2xl"/>}><TimelineContent/></Suspense>;}

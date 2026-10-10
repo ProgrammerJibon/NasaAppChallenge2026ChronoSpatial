@@ -15,7 +15,7 @@ export interface BlinkCompareProps {
 
 export function BlinkCompare({ obsA, obsB, alignedSrcA, alignedSrcB }: BlinkCompareProps) {
   const [activeEpoch, setActiveEpoch] = useState<"A" | "B">("A");
-  const [isBlinking, setIsBlinking] = useState(true);
+  const [isBlinking, setIsBlinking] = useState(false);
   const [intervalMs, setIntervalMs] = useState(500);
 
   useEffect(() => {

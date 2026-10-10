@@ -11,7 +11,8 @@ export interface ReviewItem {
 }
 
 export async function getNextReviewItem(
-  visitorHash: string
+  visitorHash: string,
+  excludedIds: string[] = []
 ): Promise<ReviewItem | null> {
   // Find a candidate that has not been voted on by this visitor
   const unvotedCandidates = await query<any>(
@@ -20,34 +21,14 @@ export async function getNextReviewItem(
      JOIN comparisons comp ON c.comparison_id = comp.id
      LEFT JOIN reviews r ON r.candidate_id = c.id AND r.visitor_hash = ?
      WHERE comp.status = 'completed' AND r.id IS NULL
+     ${excludedIds.length ? `AND c.id NOT IN (${excludedIds.map(() => '?').join(',')})` : ''}
      ORDER BY c.score DESC
      LIMIT 1`,
-    [visitorHash]
+    [visitorHash, ...excludedIds]
   );
 
   if (unvotedCandidates.length > 0) {
     const cand = unvotedCandidates[0];
-    const comp = await getComparisonById(cand.comp_id);
-    return {
-      comparisonId: cand.comp_id,
-      candidateId: cand.id,
-      candidate: cand,
-      comparison: comp,
-    };
-  }
-
-  // Fallback: pick any completed comparison with candidates
-  const fallbackCandidates = await query<any>(
-    `SELECT c.*, comp.id as comp_id
-     FROM change_candidates c
-     JOIN comparisons comp ON c.comparison_id = comp.id
-     WHERE comp.status = 'completed'
-     ORDER BY c.created_at DESC
-     LIMIT 1`
-  );
-
-  if (fallbackCandidates.length > 0) {
-    const cand = fallbackCandidates[0];
     const comp = await getComparisonById(cand.comp_id);
     return {
       comparisonId: cand.comp_id,

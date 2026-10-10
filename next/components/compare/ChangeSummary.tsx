@@ -12,6 +12,10 @@ export interface ChangeSummaryProps {
 export function ChangeSummary({ comparison, onSelectCandidate }: ChangeSummaryProps) {
   const summary = comparison.summary_json || {};
   const candidates = comparison.candidates || [];
+  const a = comparison.observationA;
+  const b = comparison.observationB;
+  const baseline = a && b ? Math.abs(Date.parse(b.observation_date)-Date.parse(a.observation_date))/86400000 : summary.time_interval_days;
+  const bandLabel = a && b ? a.band_number === b.band_number ? `Band ${a.band_number}` : `Bands ${a.band_number} / ${b.band_number}` : summary.spectral_band ? `Band ${summary.spectral_band}` : "—";
 
   return (
     <div className="flex flex-col gap-6">
@@ -23,7 +27,7 @@ export function ChangeSummary({ comparison, onSelectCandidate }: ChangeSummaryPr
             <span>Time Baseline</span>
           </div>
           <div className="text-lg font-bold text-white">
-            {summary.time_interval_days || 180} <span className="text-xs font-normal text-slate-400">days</span>
+            {baseline != null ? baseline.toFixed(1) : "—"} <span className="text-xs font-normal text-slate-400">days</span>
           </div>
         </div>
 
@@ -33,7 +37,7 @@ export function ChangeSummary({ comparison, onSelectCandidate }: ChangeSummaryPr
             <span>RMS Delta</span>
           </div>
           <div className="text-lg font-bold text-white">
-            {summary.rms_difference ? summary.rms_difference.toFixed(4) : "0.0420"}
+            {summary.rms_difference != null ? summary.rms_difference.toFixed(4) : "—"}
           </div>
         </div>
 
@@ -52,7 +56,7 @@ export function ChangeSummary({ comparison, onSelectCandidate }: ChangeSummaryPr
             <span>Spectral Band</span>
           </div>
           <div className="text-lg font-bold text-indigo-300">
-            Band {summary.spectral_band || 2}
+            {bandLabel}
           </div>
         </div>
       </div>
@@ -107,7 +111,7 @@ export function ChangeSummary({ comparison, onSelectCandidate }: ChangeSummaryPr
           <span className="font-semibold block text-amber-300 mb-0.5">
             Scientific Reliability Notice
           </span>
-          Automated candidates are statistical outliers extracted via DAOStarFinder aperture photometry.
+          Candidate signals are leads for inspection.
           Detector artifacts, PSF variations across LVF channels, and resampling noise can produce false positive signals.
           Citizen verification and spectroscopic follow-up are required before confirming astronomical discoveries.
         </div>

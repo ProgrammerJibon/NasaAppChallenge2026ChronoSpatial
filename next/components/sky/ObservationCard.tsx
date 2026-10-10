@@ -19,9 +19,11 @@ export function ObservationCard({
   compact = false,
 }: ObservationCardProps) {
   return (
-    <div
+    <button
+      type="button"
+      aria-pressed={selected}
       onClick={() => onSelect?.(observation)}
-      className={`relative overflow-hidden rounded-xl border transition-all duration-200 cursor-pointer ${
+      className={`observation-card overflow-hidden ${
         selected
           ? "bg-sky-950/40 border-sky-500 shadow-md shadow-sky-950/40 ring-1 ring-sky-500"
           : "bg-slate-900/60 border-slate-800/80 hover:border-slate-700 hover:bg-slate-900"
@@ -47,16 +49,8 @@ export function ObservationCard({
           </span>
         </div>
 
-        <div className="text-[11px] text-slate-400 font-mono truncate">
-          {formatWavelength(observation.wavelength_min_um, observation.wavelength_max_um)}
-        </div>
 
-        {!compact && (
-          <div className="text-[10px] text-slate-400 mt-1 truncate">
-            {formatCoords(observation.ra, observation.dec)}
-          </div>
-        )}
       </div>
-    </div>
+    </button>
   );
 }

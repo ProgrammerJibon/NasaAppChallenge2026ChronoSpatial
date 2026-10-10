@@ -19,7 +19,8 @@ export function BandSelector({
       <button
         type="button"
         onClick={() => onSelectBand(null)}
-        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition cursor-pointer ${
+        aria-pressed={selectedBand === null}
+        className={`selection-chip ${
           selectedBand === null
             ? "bg-slate-200 text-slate-900 shadow-sm"
             : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200"
@@ -35,7 +36,8 @@ export function BandSelector({
             key={b.id}
             type="button"
             onClick={() => onSelectBand(b.id)}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition cursor-pointer ${
+            aria-pressed={isSelected}
+            className={`selection-chip flex items-center gap-1.5 ${
               isSelected
                 ? "bg-sky-500/20 text-sky-400 border border-sky-500/50 shadow-sm shadow-sky-500/10"
                 : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700"
@@ -46,9 +48,7 @@ export function BandSelector({
               style={{ backgroundColor: b.color }}
             />
             <span>{b.name}</span>
-            <span className="text-[10px] text-slate-400 hidden sm:inline">
-              ({b.range.split(" ")[0]}µm)
-            </span>
+
           </button>
         );
       })}

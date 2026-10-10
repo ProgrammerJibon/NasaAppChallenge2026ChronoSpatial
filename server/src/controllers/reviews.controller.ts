@@ -11,7 +11,8 @@ export async function getNext(req: Request, res: Response) {
   const visitorHeader = req.headers["x-visitor-id"] || req.ip || "anonymous";
   const visitorHash = sha256(String(visitorHeader));
 
-  const item = await getNextReviewItem(visitorHash);
+  const excluded = typeof req.query.exclude === "string" ? req.query.exclude.split(",").filter(id => /^[a-zA-Z0-9_-]{1,100}$/.test(id)).slice(0,50) : [];
+  const item = await getNextReviewItem(visitorHash, excluded);
   if (!item) {
     return sendError(
       res,
@@ -31,7 +32,7 @@ export async function submit(req: Request, res: Response) {
   const reviewId = await submitReview(
     comparisonId,
     candidateId ?? null,
-    visitorHash,
+    sha256(visitorHash),
     classification,
     confidence ?? 1.0
   );

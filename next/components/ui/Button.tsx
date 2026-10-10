@@ -30,7 +30,7 @@ export function Button({
 
   const variantClasses = {
     primary:
-      "bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white shadow-md shadow-sky-950/20 active:scale-[0.98]",
+      "bg-[var(--accent)] text-[var(--accent-ink)] hover:brightness-110 active:scale-[0.98]",
     secondary:
       "bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700/80 active:scale-[0.98]",
     outline:

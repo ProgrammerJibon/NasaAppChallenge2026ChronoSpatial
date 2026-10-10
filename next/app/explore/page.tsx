@@ -1,352 +1,63 @@
 "use client";
-
-import React, { useState, useEffect, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense, useEffect, useState, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { api, ApiError } from "@/lib/api";
-import type { Observation, SkyRegion } from "@/lib/types";
+import { RiArrowRightLine, RiSearchLine } from "react-icons/ri";
+import { MissionWorkspace, ScienceDetails } from "@/components/mission/MissionWorkspace";
+import { useSkyArchive } from "@/hooks/useSkyArchive";
 import { SkyImageViewer } from "@/components/sky/SkyImageViewer";
-import { CoordinateSearch } from "@/components/sky/CoordinateSearch";
-import { RegionSelector } from "@/components/sky/RegionSelector";
-import { BandSelector } from "@/components/sky/BandSelector";
 import { ObservationStrip } from "@/components/sky/ObservationStrip";
 import { MetadataPanel } from "@/components/sky/MetadataPanel";
-import { ErrorState } from "@/components/ui/ErrorState";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { formatDate, formatCoords, formatWavelength } from "@/lib/format";
-import { BeginnerExplainer } from "@/components/ui/BeginnerExplainer";
-import { useLanguage } from "@/lib/i18n";
-import {
-  RiTimeLine,
-  RiContrast2Line,
-  RiArrowLeftLine,
-  RiArrowRightLine,
-  RiCompass3Line,
-  RiSparklingLine,
-} from "react-icons/ri";
-
+import { ErrorState } from "@/components/ui/ErrorState";
+import { api } from "@/lib/api";
+import { parseCoordinates } from "@/lib/coordinates";
+import { findEpochPair } from "@/lib/observationPairs";
+import { shortFieldName, matchSkyField } from "@/lib/skyFields";
+import { formatShortDate } from "@/lib/format";
+import type { Observation, SkyRegion } from "@/lib/types";
 function ExploreContent() {
-  const { t } = useLanguage();
-  const searchParams = useSearchParams();
-  const router = useRouter();
-
-  const [regions, setRegions] = useState<SkyRegion[]>([]);
-  const [selectedRegion, setSelectedRegion] = useState<SkyRegion | null>(null);
-  const [observations, setObservations] = useState<Observation[]>([]);
-  const [selectedObs, setSelectedObs] = useState<Observation | null>(null);
-  const [selectedBand, setSelectedBand] = useState<number | null>(null);
-
-  const [loading, setLoading] = useState(true);
-  const [searching, setSearching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Initial load
-  useEffect(() => {
-    async function init() {
-      try {
-        setLoading(true);
-        setError(null);
-        const [regList, bs] = await Promise.all([
-          api.getRegions(),
-          api.getBootstrap(),
-        ]);
-        setRegions(regList);
-
-        // Check query param for region slug
-        const regionSlug = searchParams.get("region");
-        const obsId = searchParams.get("obs");
-
-        let activeRegion = regList.find((r) => r.slug === regionSlug) || bs.featuredRegion || regList[0];
-        setSelectedRegion(activeRegion);
-
-        // Load observations for region
-        const obsRes = await api.listObservations({
-          regionId: activeRegion.id,
-          limit: 50,
-        });
-        setObservations(obsRes.observations);
-
-        const initialObs =
-          (obsId && obsRes.observations.find((o) => o.id === obsId)) ||
-          obsRes.observations[0] ||
-          bs.demoObservations[0] ||
-          null;
-        setSelectedObs(initialObs);
-      } catch (err: any) {
-        setError(err instanceof ApiError ? err.message : "Failed to load sky explorer data.");
-      } finally {
-        setLoading(false);
-      }
-    }
-    init();
-  }, [searchParams]);
-
-  // Handle region selection
-  const handleSelectRegion = async (region: SkyRegion) => {
-    setSelectedRegion(region);
-    setSelectedBand(null);
-    setLoading(true);
+  const archive=useSkyArchive(), params=useSearchParams();
+  const searchRequest=useRef(0);
+  const [slug,setSlug]=useState(params.get("region")??"m31"), [band,setBand]=useState<number|null>(null);
+  const [selectedId,setSelectedId]=useState(params.get("obs")), [query,setQuery]=useState("");
+  const [notice,setNotice]=useState<string|null>(null), [searching,setSearching]=useState(false);
+  const [custom,setCustom]=useState<Observation[]|null>(null), [details,setDetails]=useState(false);
+  useEffect(()=>{setSlug(params.get("region")??"m31");setSelectedId(params.get("obs"));setBand(null);setCustom(null);},[params]);
+  const region=archive.regions.find(r=>r.slug===slug)??archive.regions[0];
+  const fieldImages=custom??archive.observations.filter(o=>o.region_id===region?.id);
+  const images=fieldImages.filter(o=>band===null || o.band_number===band);
+  const current=images.find(o=>o.id===selectedId)??images[0];
+  const pair=current ? findEpochPair(fieldImages,current) : null;
+  const chooseField=(field:SkyRegion)=>{searchRequest.current++;setSearching(false);setSlug(field.slug);setBand(null);setSelectedId(null);setCustom(null);setNotice(null);};
+  const search=async()=>{
+    const field=matchSkyField(query,archive.regions);
+    if(field) {chooseField(field);setNotice(`Here are the images of ${shortFieldName(field)}.`);return;}
+    const coordinates=parseCoordinates(query);
+    if(!coordinates.isValid) {setNotice("Try a field above, or enter RA and Dec as two numbers.");return;}
+    const requestId=++searchRequest.current;setSearching(true);
     try {
-      const res = await api.listObservations({ regionId: region.id, limit: 50 });
-      setObservations(res.observations);
-      setSelectedObs(res.observations[0] || null);
-      router.push(`/explore?region=${region.slug}`);
-    } catch (err: any) {
-      setError(err.message || "Failed to load observations for region");
-    } finally {
-      setLoading(false);
-    }
+      const result=await api.searchObservations({ra:coordinates.ra,dec:coordinates.dec,radiusDeg:.25});
+      if(searchRequest.current!==requestId) return;
+      if(result.status==="cached" && result.observations?.length) {setCustom(result.observations);setBand(null);setSelectedId(null);setNotice(`${result.observations.length} images found.`);}
+      else setNotice("No images are available here yet. Choose a field above to explore the local archive.");
+    } catch {if(searchRequest.current===requestId) setNotice("Search is unavailable. You can still choose a field above.");}
+    finally {if(searchRequest.current===requestId) setSearching(false);}
   };
-
-  // Handle band filter
-  const handleSelectBand = async (band: number | null) => {
-    setSelectedBand(band);
-    if (!selectedRegion) return;
-    setLoading(true);
-    try {
-      const res = await api.listObservations({
-        regionId: selectedRegion.id,
-        band: band ?? undefined,
-        limit: 50,
-      });
-      setObservations(res.observations);
-      if (res.observations.length > 0) {
-        setSelectedObs(res.observations[0]);
-      }
-    } catch (err: any) {
-      setError(err.message || "Failed to filter observations");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle custom coordinates search
-  const handleSearchCoords = async (ra: number, dec: number, targetName?: string) => {
-    setSearching(true);
-    setError(null);
-    try {
-      const res = await api.searchObservations({ ra, dec, radiusDeg: 0.25 });
-      if (res.status === "cached" && res.observations && res.observations.length > 0) {
-        setObservations(res.observations);
-        setSelectedObs(res.observations[0]);
-      } else if (res.jobId) {
-        // Poll job
-        const job = await api.getJob(res.jobId);
-        if (job.status === "completed") {
-          const obsList = await api.listObservations({ limit: 20 });
-          setObservations(obsList.observations);
-          setSelectedObs(obsList.observations[0]);
-        }
-      }
-    } catch (err: any) {
-      setError(err.message || "Failed to search coordinates in archive.");
-    } finally {
-      setSearching(false);
-    }
-  };
-
-  // Next / Prev observation
-  const currentObsIndex = selectedObs
-    ? observations.findIndex((o) => o.id === selectedObs.id)
-    : -1;
-
-  const handleNextObs = () => {
-    if (currentObsIndex < observations.length - 1) {
-      setSelectedObs(observations[currentObsIndex + 1]);
-    }
-  };
-
-  const handlePrevObs = () => {
-    if (currentObsIndex > 0) {
-      setSelectedObs(observations[currentObsIndex - 1]);
-    }
-  };
-
-  if (error) {
-    return (
-      <ErrorState
-        title="Explore data unavailable"
-        message={error}
-        onRetry={() => window.location.reload()}
-      />
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-6">
-      {/* Top Search & Filter Bar */}
-      <div className="flex flex-col gap-4 p-5 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-md">
-        <CoordinateSearch onSearch={handleSearchCoords} loading={searching} />
-
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-2 border-t border-slate-800/80">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-400">{t("regionsLabel")}</span>
-            <RegionSelector
-              regions={regions}
-              selectedSlug={selectedRegion?.slug}
-              onSelect={handleSelectRegion}
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-400">{t("filterLabel")}</span>
-            <BandSelector
-              selectedBand={selectedBand}
-              onSelectBand={handleSelectBand}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Beginner Guide Explainer */}
-      <BeginnerExplainer
-        pageTitle={t("exploreHeading")}
-        pagePurpose={t("exploreSub")}
-        items={[
-          {
-            icon: <RiCompass3Line className="w-4 h-4 text-cyan-400" />,
-            term: t("raDecTitle"),
-            definition: t("raDecDesc"),
-          },
-          {
-            icon: <RiSparklingLine className="w-4 h-4 text-amber-400" />,
-            term: t("bandTitle"),
-            definition: t("bandDesc"),
-          },
-          {
-            icon: <RiContrast2Line className="w-4 h-4 text-purple-400" />,
-            term: t("differenceTitle"),
-            definition: t("differenceDesc"),
-          },
-          {
-            icon: <RiTimeLine className="w-4 h-4 text-sky-400" />,
-            term: t("epochTitle"),
-            definition: t("epochDesc"),
-          },
-        ]}
-      />
-
-      {/* Main Grid: Interactive Viewer + Sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left: Main Sky Viewer */}
-        <div className="lg:col-span-8 flex flex-col gap-4">
-          <div className="p-4 rounded-3xl bg-slate-950/70 border border-slate-800">
-            {loading ? (
-              <Skeleton className="w-full h-[520px] rounded-2xl" />
-            ) : selectedObs ? (
-              <SkyImageViewer
-                observationId={selectedObs.id}
-                alt={selectedObs.archive_id}
-                ra={selectedObs.ra}
-                dec={selectedObs.dec}
-                className="w-full h-[520px]"
-              />
-            ) : (
-              <div className="flex items-center justify-center h-[520px] text-slate-400 text-xs">
-                {t("noObsSelected")}
-              </div>
-            )}
-
-            {/* Viewer Footer Bar */}
-            {selectedObs && (
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-4 mt-3 border-t border-slate-900 text-xs">
-                <div className="flex items-center gap-3">
-                  <span className="font-semibold text-white">
-                    {formatDate(selectedObs.observation_date)}
-                  </span>
-                  <span className="text-indigo-400 font-mono">
-                    Band {selectedObs.band_number} ({formatWavelength(selectedObs.wavelength_min_um, selectedObs.wavelength_max_um)})
-                  </span>
-                  <span className="text-slate-400 font-mono">
-                    {formatCoords(selectedObs.ra, selectedObs.dec)}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={handlePrevObs}
-                    disabled={currentObsIndex <= 0}
-                    className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-slate-300 transition"
-                    title={t("prevObs")}
-                  >
-                    <RiArrowLeftLine className="w-4 h-4" />
-                  </button>
-                  <span className="text-xs font-mono text-slate-400 px-1">
-                    {currentObsIndex + 1} / {observations.length}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleNextObs}
-                    disabled={currentObsIndex >= observations.length - 1}
-                    className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-slate-300 transition"
-                    title={t("nextObs")}
-                  >
-                    <RiArrowRightLine className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Quick Context CTAs */}
-          {selectedObs && (
-            <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-slate-900/40 border border-slate-800">
-              <span className="text-xs text-slate-300">
-                {t("quickInvestigateTitle")}
-              </span>
-
-              <div className="flex items-center gap-3">
-                <Link
-                  href={`/timeline?region=${selectedRegion?.slug || "m31"}`}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 transition"
-                >
-                  <RiTimeLine className="text-sky-400" />
-                  <span>{t("openInTimeline")}</span>
-                </Link>
-
-                <Link
-                  href={`/compare?a=${selectedObs.id}`}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-medium text-white shadow-md shadow-purple-950/20 transition"
-                >
-                  <RiContrast2Line />
-                  <span>{t("compareThisEpoch")}</span>
-                </Link>
-              </div>
-            </div>
-          )}
-
-          {/* Metadata Panel */}
-          <MetadataPanel observation={selectedObs} />
-        </div>
-
-        {/* Right: Observation Strip Gallery */}
-        <div className="lg:col-span-4 flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-slate-200">
-              {t("epochObservations")} ({observations.length})
-            </h3>
-            <span className="text-[11px] font-mono text-slate-400">
-              {selectedRegion?.name}
-            </span>
-          </div>
-
-          <ObservationStrip
-            observations={observations}
-            selectedId={selectedObs?.id}
-            onSelect={(obs) => setSelectedObs(obs)}
-            orientation="vertical"
-          />
-        </div>
-      </div>
-    </div>
-  );
+  const fieldLabel=custom ? "Coordinate search" : region ? shortFieldName(region) : "Loading sky…";
+  const topics=[...archive.regions.map((field,i)=>({hidden:i>=3,label:`Show ${shortFieldName(field)}`,keywords:[shortFieldName(field),field.slug,...(field.slug==="m31" ? ["m31","andromeda"] : field.slug==="pleiades" ? ["m45"] : field.slug==="orion" ? ["m42"] : [])],answer:`Let's look at ${shortFieldName(field)}. Choose a date below the image to see another observation.`,action:()=>chooseField(field)})),
+    {label:"What am I seeing?",keywords:["seeing","image","black","infrared"],answer:"An infrared observation, shown in grayscale. Bright areas are stronger signals. Black areas can be masked or missing pixels; they do not prove a black hole."},
+    {label:"Show image details",keywords:["details","science","wavelength","coordinates","band"],answer:"I've opened the image details. A band is a range of infrared wavelengths. Compare matching bands across dates.",action:()=>setDetails(true)}];
+  return <MissionWorkspace title="Where shall we look?" subtitle="Choose a place. Explore a real image of the sky." scene="planet" welcome="Hi, explorer. Pick a sky field and I'll help you understand the images." context={current ? `${fieldLabel} · ${images.length} images` : undefined} topics={topics}>
+    <div className="field-choices" role="group" aria-label="Choose a sky field">{archive.regions.map(field=><button key={field.id} type="button" aria-pressed={!custom && region?.id===field.id} onClick={()=>chooseField(field)}>{shortFieldName(field)}</button>)}</div>
+    <form className="mission-search" onSubmit={event=>{event.preventDefault();search();}}><RiSearchLine/><input aria-label="Find a sky field" placeholder="Try Orion, M31 or coordinates" value={query} onChange={event=>setQuery(event.target.value)}/><button disabled={searching||!query.trim()}>{searching ? "Finding…" : "Find"}</button></form>
+    {notice && <p className="inline-notice" role="status">{notice}</p>}
+    {archive.error ? <ErrorState title="Images could not load" message="Try loading the archive again." onRetry={archive.retry}/> : archive.loading ? <Skeleton className="h-[420px] rounded-2xl"/> : current ? <>
+      <div className="observation-stage"><div className="stage-heading"><strong>{fieldLabel}</strong><span>{formatShortDate(current.observation_date)} · Band {current.band_number}</span></div><SkyImageViewer key={current.id} observationId={current.id} alt={`Observation ${current.archive_id}`} ra={current.ra} dec={current.dec} className="guided-sky-viewer"/><div className="stage-caption">Infrared image · black areas may contain no valid data</div></div>
+      <div className="observation-rail"><span className="small-label">Choose an observation</span><ObservationStrip observations={images} selectedId={current.id} onSelect={image=>setSelectedId(image.id)}/></div>
+      <div className="next-actions"><Link href={`/timeline?region=${region?.slug??"m31"}`} className="secondary-link">Watch the dates change<RiArrowRightLine/></Link>{pair && <Link className="primary-link" href={`/compare?a=${pair[0].id}&b=${pair[1].id}`}>Compare two dates<RiArrowRightLine/></Link>}</div>
+    </> : <div className="mission-empty">No images in this band. Try another wavelength or sky field.</div>}
+    <ScienceDetails title="Image details & wavelength" open={details} onToggle={setDetails}><label className="simple-select">Infrared band<select aria-label="Filter infrared band" value={band??"all"} onChange={event=>{setBand(event.target.value==="all" ? null : Number(event.target.value));setSelectedId(null);}}><option value="all">All available bands</option>{Array.from(new Set(fieldImages.map(o=>o.band_number))).sort().map(value=><option key={value} value={value}>Band {value}</option>)}</select></label>{current && <MetadataPanel observation={current}/>}</ScienceDetails>
+  </MissionWorkspace>;
 }
-
-export default function ExplorePage() {
-  return (
-    <Suspense fallback={<Skeleton className="w-full h-96 rounded-3xl" />}>
-      <ExploreContent />
-    </Suspense>
-  );
-}
+export default function ExplorePage() {return <Suspense fallback={<Skeleton className="h-96 rounded-2xl"/>}><ExploreContent/></Suspense>;}

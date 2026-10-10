@@ -1,208 +1,54 @@
 "use client";
-
-import React, { useState, useEffect } from "react";
-import { api, ApiError } from "@/lib/api";
-import type { ReviewItem, ReviewStats } from "@/lib/types";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { MissionWorkspace, ScienceDetails } from "@/components/mission/MissionWorkspace";
 import { ReviewCard } from "@/components/review/ReviewCard";
 import { ReviewActions } from "@/components/review/ReviewActions";
-import { ErrorState } from "@/components/ui/ErrorState";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { BeginnerExplainer } from "@/components/ui/BeginnerExplainer";
-import { useLanguage } from "@/lib/i18n";
-import {
-  RiEyeLine,
-  RiCommunityLine,
-  RiShieldCheckLine,
-  RiSparklingLine,
-  RiCompass3Line,
-  RiContrast2Line,
-  RiAlertLine,
-} from "react-icons/ri";
-
+import { ErrorState } from "@/components/ui/ErrorState";
+import { api, ApiError } from "@/lib/api";
+import type { ReviewItem, ReviewStats } from "@/lib/types";
 export default function ReviewPage() {
-  const { t } = useLanguage();
-  const [item, setItem] = useState<ReviewItem | null>(null);
-  const [stats, setStats] = useState<ReviewStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Get or create anonymous visitor token
-  const getVisitorId = () => {
-    if (typeof window === "undefined") return "anonymous";
-    let vid = localStorage.getItem("spx_visitor_id");
-    if (!vid) {
-      vid = "v_" + Math.random().toString(36).substring(2) + Date.now().toString(36);
-      localStorage.setItem("spx_visitor_id", vid);
-    }
-    return vid;
+  const [item,setItem]=useState<ReviewItem|null>(null),[stats,setStats]=useState<ReviewStats|null>(null),[loading,setLoading]=useState(true),[submitting,setSubmitting]=useState(false),[error,setError]=useState<string|null>(null);
+  const excluded=useRef<string[]>([]), visitor=useRef(''), request=useRef(0);
+  const visitorId=()=>{
+    if(visitor.current) return visitor.current;
+    try {visitor.current=localStorage.getItem('spx_visitor_id')??'';} catch {}
+    if(!visitor.current) {visitor.current='v_'+crypto.randomUUID();try{localStorage.setItem('spx_visitor_id',visitor.current);}catch{}}
+    return visitor.current;
   };
-
-  const loadNextItem = async () => {
+  const loadNext=useCallback(async()=>{
+    const currentRequest=++request.current;setLoading(true);setError(null);setStats(null);
     try {
-      setLoading(true);
-      setError(null);
-      const visitorId = getVisitorId();
-      const nextItem = await api.getNextReview(visitorId);
-      setItem(nextItem);
-
-      if (nextItem.comparisonId) {
-        const reviewStats = await api.getReviewStats(nextItem.comparisonId);
-        setStats(reviewStats);
-      }
-    } catch (err: any) {
-      setError(err instanceof ApiError ? err.message : "Failed to load review candidate.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadNextItem();
-  }, []);
-
-  const handleSubmitReview = async (classification: string, confidence: number) => {
-    if (!item) return;
+      const next=await api.getNextReview(visitorId(),excluded.current);
+      if(request.current!==currentRequest) return;
+      if(next.candidateId && excluded.current.includes(next.candidateId)) {setItem(null);return;}
+      setItem(next);
+      const summary=await api.getReviewStats(next.comparisonId).catch(()=>null);
+      if(request.current===currentRequest) setStats(summary);
+    } catch(error) {
+      if(request.current!==currentRequest) return;
+      if(error instanceof ApiError && error.code==='NO_REVIEW_ITEMS') setItem(null);
+      else setError('The review examples could not load. Please try again.');
+    } finally {if(request.current===currentRequest) setLoading(false);}
+  },[]);
+  useEffect(()=>{loadNext();return()=>{request.current++;};},[loadNext]);
+  const next=()=>{if(item?.candidateId) excluded.current=[...excluded.current,item.candidateId];loadNext();};
+  const submit=async(classification:string,confidence:number)=>{
+    if(!item) throw new Error('No example selected');
     setSubmitting(true);
     try {
-      const visitorId = getVisitorId();
-      await api.submitReview({
-        comparisonId: item.comparisonId,
-        candidateId: item.candidateId,
-        visitorHash: visitorId,
-        classification,
-        confidence,
-      });
-
-      // Refresh community stats
-      const updatedStats = await api.getReviewStats(item.comparisonId);
-      setStats(updatedStats);
-    } catch (err: any) {
-      alert("Failed to submit review: " + (err.message || "Error"));
-    } finally {
-      setSubmitting(false);
-    }
+      await api.submitReview({comparisonId:item.comparisonId,candidateId:item.candidateId,visitorHash:visitorId(),classification,confidence});
+      const summary=await api.getReviewStats(item.comparisonId).catch(()=>null);
+      if(summary) setStats(summary);
+    } finally {setSubmitting(false);}
   };
-
-  if (error) {
-    return (
-      <ErrorState
-        title="Review data unavailable"
-        message={error}
-        onRetry={loadNextItem}
-      />
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-8 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-md">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <RiEyeLine className="text-purple-400 w-5 h-5" />
-            <h1 className="text-xl font-bold text-white tracking-tight">
-              {t("reviewHeading")}
-            </h1>
-          </div>
-          <p className="text-xs text-slate-400">
-            {t("reviewSub")}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 text-xs text-slate-300 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 font-mono">
-          <RiShieldCheckLine className="text-emerald-400 w-4 h-4" />
-          <span>{t("privacyBadge")}</span>
-        </div>
-      </div>
-
-      {/* Beginner Guide Explainer */}
-      <BeginnerExplainer
-        pageTitle={t("citizenReviewTitle")}
-        pagePurpose={t("citizenReviewDesc")}
-        items={[
-          {
-            icon: <RiSparklingLine className="w-4 h-4 text-amber-400" />,
-            term: t("transientTitle"),
-            definition: t("differenceDesc"),
-          },
-          {
-            icon: <RiCompass3Line className="w-4 h-4 text-cyan-400" />,
-            term: t("movingObjectTitle"),
-            definition: t("swipeDesc"),
-          },
-          {
-            icon: <RiContrast2Line className="w-4 h-4 text-purple-400" />,
-            term: t("variableStarTitle"),
-            definition: t("blinkDesc"),
-          },
-          {
-            icon: <RiAlertLine className="w-4 h-4 text-rose-400" />,
-            term: t("artifactTitle"),
-            definition: t("significanceDesc"),
-          },
-        ]}
-      />
-
-      {/* Main Review Stage */}
-      {loading ? (
-        <Skeleton className="w-full h-[500px] rounded-3xl" />
-      ) : item ? (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left: Visual Viewer */}
-          <div className="lg:col-span-7">
-            <ReviewCard item={item} />
-          </div>
-
-          {/* Right: Classification Controls & Community Stats */}
-          <div className="lg:col-span-5 flex flex-col gap-6">
-            <ReviewActions
-              onSubmit={handleSubmitReview}
-              onNext={loadNextItem}
-              submitting={submitting}
-            />
-
-            {/* Community Stats */}
-            {stats && stats.totalReviews > 0 && (
-              <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 font-semibold text-slate-200">
-                    <RiCommunityLine className="text-sky-400" />
-                    <span>{t("communityStats")}</span>
-                  </div>
-                  <span className="font-mono text-slate-400">
-                    {stats.totalReviews} {stats.totalReviews === 1 ? "review" : "reviews"}
-                  </span>
-                </div>
-
-                <div className="space-y-1.5">
-                  {Object.entries(stats.classifications).map(([key, count]) => {
-                    const percentage = Math.round((count / stats.totalReviews) * 100);
-                    return (
-                      <div key={key} className="space-y-0.5">
-                        <div className="flex justify-between text-[11px] text-slate-300">
-                          <span>{key}</span>
-                          <span className="font-mono text-slate-400">{count} ({percentage}%)</span>
-                        </div>
-                        <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-sky-500 rounded-full"
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="p-12 text-center text-slate-400 bg-slate-900/40 rounded-3xl border border-slate-800">
-          No candidates currently queued for review. Check back soon!
-        </div>
-      )}
-    </div>
-  );
+  return <MissionWorkspace title="A second pair of eyes." subtitle="Look at two images. Tell us what you notice." scene="ship" welcome="You don't need to be an astronomer. Look for a change, then choose the description that fits best." context={`Example ${excluded.current.length+1} · no account needed`} topics={[
+    {label:'What should I look for?',keywords:['look','notice','start'],answer:'A point that shifts position, changes brightness, appears, or disappears. Press play to switch between the images.'},
+    {label:'What if I am unsure?',keywords:['unsure','sure','uncertain'],answer:'Choose “I am not sure.” It is better to be honest than to guess.'},
+    {label:'Is a vote a discovery?',keywords:['vote','discovery','confirmed'],answer:'No. Votes are assessments of possible changes. Detector noise and image artifacts need to be checked before any scientific conclusion.'},
+    {label:'How does privacy work?',keywords:['privacy','account','login'],answer:'The review uses a random visitor identifier saved in your browser, not your name or email.'}
+  ]}>
+    {error ? <ErrorState title="Review is unavailable" message={error} onRetry={loadNext}/> : loading ? <Skeleton className="h-[400px] rounded-2xl"/> : item ? <><ReviewCard key={item.candidateId??item.comparisonId} item={item}/><ReviewActions key={`actions-${item.candidateId??item.comparisonId}`} onSubmit={submit} onNext={next} submitting={submitting}/></> : <div className="mission-empty">You have reached the end of the available examples. Thank you for exploring.</div>}
+    {stats && <ScienceDetails title={`Community answers · ${stats.totalReviews} reviews`}><div className="community-bars">{Object.entries(stats.classifications).map(([classification,count])=><div key={classification}><span>{classification}</span><strong>{count}</strong><i style={{width:`${stats.totalReviews ? count/stats.totalReviews*100 : 0}%`}}/></div>)}</div></ScienceDetails>}
+  </MissionWorkspace>;
 }

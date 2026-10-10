@@ -37,6 +37,14 @@ export function SwipeCompare({ obsA, obsB, alignedSrcA, alignedSrcB }: SwipeComp
   return (
     <div
       ref={containerRef}
+      role="slider"
+      tabIndex={0}
+      aria-label="Epoch comparison divider"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={sliderPosition}
+      onKeyDown={e => { if(e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); setSliderPosition(p => Math.max(0,Math.min(100,p + (e.key === "ArrowRight" ? 5 : -5)))); } }}
+      style={{touchAction:"pan-y"}}
       onMouseMove={handleMouseMove}
       onTouchMove={handleTouchMove}
       className="relative w-full aspect-square max-h-[620px] mx-auto rounded-2xl bg-black border border-slate-800 overflow-hidden shadow-2xl select-none cursor-ew-resize"
@@ -50,7 +58,7 @@ export function SwipeCompare({ obsA, obsB, alignedSrcA, alignedSrcB }: SwipeComp
           className="w-full h-full"
         />
         <div className="absolute top-3 right-3 px-2 py-1 rounded-lg bg-black/75 border border-purple-500/40 text-[11px] font-mono text-purple-300">
-          Epoch B: {formatShortDate(obsB.observation_date)}
+          Second: {formatShortDate(obsB.observation_date)}
         </div>
       </div>
 
@@ -66,7 +74,7 @@ export function SwipeCompare({ obsA, obsB, alignedSrcA, alignedSrcB }: SwipeComp
           className="w-full h-full"
         />
         <div className="absolute top-3 left-3 px-2 py-1 rounded-lg bg-black/75 border border-sky-500/40 text-[11px] font-mono text-sky-300">
-          Epoch A: {formatShortDate(obsA.observation_date)}
+          First: {formatShortDate(obsA.observation_date)}
         </div>
       </div>
 

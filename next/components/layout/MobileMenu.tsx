@@ -34,18 +34,18 @@ export function MobileMenu() {
   ];
 
   return (
-    <div className="md:hidden">
+    <div className="mobile-navigation">
       <button
         onClick={() => setOpen(!open)}
         className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white cursor-pointer"
-        aria-label="Toggle mobile menu"
+        aria-label="Toggle mobile menu" aria-expanded={open} aria-controls="mobile-nav"
       >
         {open ? <RiCloseLine className="w-5 h-5" /> : <RiMenuLine className="w-5 h-5" />}
       </button>
 
       {open && (
-        <div className="fixed inset-x-0 top-16 z-50 p-4 bg-slate-950/95 border-b border-slate-800/90 backdrop-blur-xl shadow-2xl animate-fade-in">
-          <nav className="flex flex-col gap-1.5">
+        <div className="fixed inset-x-0 top-20 z-50 p-4 bg-slate-950/95 border-b border-slate-800/90 backdrop-blur-xl shadow-2xl animate-fade-in">
+          <nav id="mobile-nav" className="flex flex-col gap-1.5">
             {navItems.map((item) => {
               const isActive =
                 item.href === "/"
