@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { api } from "@/lib/api";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { RiImageLine } from "react-icons/ri";
@@ -14,20 +14,28 @@ export interface SkyImageProps {
   crosshairPos?: { x: number; y: number } | null;
 }
 
-export function SkyImage({
-  observationId,
-  src,
-  alt,
-  className = "",
-  crosshair = false,
-  crosshairPos,
-}: SkyImageProps) {
-  const [loading, setLoading] = useState(true);
+export function SkyImage(props: SkyImageProps) {
+  const imageUrl = props.src || (props.observationId ? api.getPreviewUrl(props.observationId) : "");
+  // Scope load/error state to the source so a previous image cannot hide its replacement.
+  return <SkyImageSource key={imageUrl} {...props} imageUrl={imageUrl} />;
+}
+
+function SkyImageSource({
+  imageUrl, alt, className = "", crosshair = false, crosshairPos,
+}: SkyImageProps & { imageUrl: string }) {
+  const imageRef = useRef<HTMLImageElement>(null);
+  const [loading, setLoading] = useState(Boolean(imageUrl));
   const [error, setError] = useState(false);
 
-  const imageUrl = src || (observationId ? api.getPreviewUrl(observationId) : "");
-
-  useEffect(() => { setLoading(Boolean(imageUrl)); setError(false); }, [imageUrl]);
+  useEffect(() => {
+    // A browser-cache hit can finish before React attaches the load handler.
+    // Never reset a completed image to loading after its onLoad has fired.
+    const image = imageRef.current;
+    if (image?.complete && imageUrl) {
+      setLoading(false);
+      setError(image.naturalWidth === 0);
+    }
+  }, [imageUrl]);
 
   return (
     <div className={`relative overflow-hidden bg-black flex items-center justify-center select-none ${className}`}>
@@ -43,6 +51,7 @@ export function SkyImage({
       ) : (
         /* eslint-disable-next-line @next/next/no-img-element */
         <img
+          ref={imageRef}
           src={imageUrl}
           alt={alt}
           onLoad={() => setLoading(false)}

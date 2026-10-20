@@ -2,16 +2,26 @@ import { env } from "./config/env.js";
 import { logger } from "./utils/logger.js";
 import { bootstrapDatabase } from "./db/bootstrap.js";
 import { app } from "./app.js";
+import { createDemoFallbackApp } from "./demo-fallback.js";
 
 async function startServer() {
   try {
     logger.info("Initializing SPHEREx Sky Change Explorer API server...");
 
     // 1. Ensure database, migrations, and demo data
-    await bootstrapDatabase();
+    let activeApp = app;
+    try {
+      await bootstrapDatabase();
+    } catch (error) {
+      if (env.NODE_ENV !== "development") throw error;
+      const fallback = await createDemoFallbackApp();
+      if (!fallback) throw error;
+      activeApp = fallback;
+      logger.warn("MySQL is unavailable. Serving bundled IRSA observations with SQLite-backed observation reviews.");
+    }
 
     // 2. Start HTTP listener
-    const server = app.listen(env.PORT, env.HOST, () => {
+    const server = activeApp.listen(env.PORT, env.HOST, () => {
       logger.info(
         `Server listening on http://${env.HOST}:${env.PORT} (env: ${env.NODE_ENV})`
       );

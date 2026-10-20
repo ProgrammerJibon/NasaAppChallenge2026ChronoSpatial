@@ -1,7 +1,17 @@
+function archiveDate(dateStr: string | Date): Date {
+  if (dateStr instanceof Date) return dateStr;
+  // IRSA manifest timestamps are UTC but omit the trailing Z.
+  const utcText = /^\d{4}-\d{2}-\d{2}T/.test(dateStr) && !/(?:Z|[+-]\d{2}:?\d{2})$/i.test(dateStr)
+    ? `${dateStr}Z`
+    : dateStr;
+  return new Date(utcText);
+}
+
 export function formatDate(dateStr: string | Date | null | undefined): string {
   if (!dateStr) return "Unknown Date";
   try {
-    const d = new Date(dateStr);
+    const d = archiveDate(dateStr);
+    if (Number.isNaN(d.getTime())) return String(dateStr);
     return new Intl.DateTimeFormat("en-US", {
       year: "numeric",
       month: "short",
@@ -19,7 +29,8 @@ export function formatDate(dateStr: string | Date | null | undefined): string {
 export function formatShortDate(dateStr: string | Date | null | undefined): string {
   if (!dateStr) return "Unknown";
   try {
-    const d = new Date(dateStr);
+    const d = archiveDate(dateStr);
+    if (Number.isNaN(d.getTime())) return String(dateStr);
     return new Intl.DateTimeFormat("en-US", {
       year: "numeric",
       month: "short",

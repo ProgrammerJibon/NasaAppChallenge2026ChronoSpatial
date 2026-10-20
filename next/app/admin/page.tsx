@@ -26,6 +26,7 @@ import {
 } from "react-icons/ri";
 
 interface SystemStatus {
+  mode?: "local-archive";
   apiHealth: string;
   databaseHealth: string;
   workerStatus: string;
@@ -49,6 +50,26 @@ interface StorageStatus {
   directories: Record<string, { bytes: number; human: string }>;
 }
 
+interface PlatformOverview {
+  checkedAt: string;
+  mode: "local-archive" | "database";
+  site: {
+    status: "online" | "degraded" | "offline" | "unconfigured";
+    online: number;
+    total: number;
+    pages: Array<{ path: string; label: string; status: string; httpStatus: number | null; latencyMs: number | null }>;
+  };
+  archive: {
+    regions: number;
+    observations: number;
+    comparisons: number;
+    candidates: number;
+    previews: { available: number; total: number };
+    comparisonAssets: { available: number; total: number };
+  };
+  reviews: { observationReviews: number; candidateReviews: number; lastAt: string | null };
+}
+
 function AdminConsole() {
   const [token, setToken] = useState<string | null>(null);
   const [password, setPassword] = useState("");
@@ -57,6 +78,7 @@ function AdminConsole() {
 
   // Dashboard Data
   const [status, setStatus] = useState<SystemStatus | null>(null);
+  const [overview, setOverview] = useState<PlatformOverview | null>(null);
   const [storage, setStorage] = useState<StorageStatus | null>(null);
   const [jobs, setJobs] = useState<ProcessingJob[]>([]);
   const [jobFilter, setJobFilter] = useState<string>("all");
@@ -107,6 +129,7 @@ function AdminConsole() {
     }
     setToken(null);
     setStatus(null);
+    setOverview(null);
     setStorage(null);
     setJobs([]);
     try {
@@ -120,8 +143,9 @@ function AdminConsole() {
     if (!token) return;
     setIsLoading(true);
     try {
-      const [statusRes, storageRes, jobsRes] = await Promise.all([
+      const [statusRes, overviewRes, storageRes, jobsRes] = await Promise.all([
         api.adminGetStatus(token),
+        api.adminGetOverview(token),
         api.adminGetStorage(token),
         api.adminGetJobs(token, {
           status: jobFilter === "all" ? undefined : jobFilter,
@@ -129,6 +153,7 @@ function AdminConsole() {
         }),
       ]);
       setStatus(statusRes);
+      setOverview(overviewRes);
       setStorage(storageRes);
       setJobs(jobsRes.jobs || []);
     } catch (err: any) {
@@ -151,6 +176,8 @@ function AdminConsole() {
   useEffect(() => {
     if (token) {
       fetchDashboardData();
+      const refreshTimer = window.setInterval(fetchDashboardData, 60_000);
+      return () => window.clearInterval(refreshTimer);
     }
   }, [token, fetchDashboardData]);
 
@@ -275,10 +302,88 @@ function AdminConsole() {
         </div>
       </div>
 
+      {overview && (
+        <section className="space-y-4" aria-label="Platform overview">
+          <div className="flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-violet-300">Platform overview</p>
+              <h2 className="text-xl font-semibold text-white">What is available right now</h2>
+            </div>
+            <p className="text-xs text-slate-400">Checked {formatDate(overview.checkedAt)} · Page checks confirm HTTP reachability</p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl border border-slate-700 bg-slate-900/80 p-4">
+              <p className="text-xs text-slate-400">Public pages</p>
+              <p className={`mt-2 text-2xl font-semibold ${overview.site.online === overview.site.total ? "text-emerald-300" : "text-amber-300"}`}>
+                {overview.site.online} / {overview.site.total}
+              </p>
+              <p className="mt-1 text-xs text-slate-400">Reachable from this server</p>
+            </div>
+            <div className="rounded-2xl border border-slate-700 bg-slate-900/80 p-4">
+              <p className="text-xs text-slate-400">Observation images</p>
+              <p className={`mt-2 text-2xl font-semibold ${overview.archive.previews.available === overview.archive.previews.total ? "text-emerald-300" : "text-amber-300"}`}>
+                {overview.archive.previews.available} / {overview.archive.previews.total}
+              </p>
+              <p className="mt-1 text-xs text-slate-400">Preview files available locally</p>
+            </div>
+            <div className="rounded-2xl border border-slate-700 bg-slate-900/80 p-4">
+              <p className="text-xs text-slate-400">Comparison images</p>
+              <p className={`mt-2 text-2xl font-semibold ${overview.archive.comparisonAssets.available === overview.archive.comparisonAssets.total ? "text-emerald-300" : "text-amber-300"}`}>
+                {overview.archive.comparisonAssets.available} / {overview.archive.comparisonAssets.total}
+              </p>
+              <p className="mt-1 text-xs text-slate-400">Aligned and change-map files</p>
+            </div>
+            <div className="rounded-2xl border border-slate-700 bg-slate-900/80 p-4">
+              <p className="text-xs text-slate-400">Citizen reviews</p>
+              <p className="mt-2 text-2xl font-semibold text-violet-200">{overview.reviews.observationReviews}</p>
+              <p className="mt-1 text-xs text-slate-400">
+                {overview.reviews.lastAt ? `Latest saved ${formatDate(overview.reviews.lastAt)}` : "No observation reviews saved yet"}
+              </p>
+            </div>
+          </div>
+          <div className="grid gap-4 lg:grid-cols-[1.45fr_1fr]">
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+              <h3 className="mb-3 text-sm font-semibold text-white">Page availability</h3>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {overview.site.pages.map(page => (
+                  <div key={page.path} className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-950/50 px-3 py-2 text-xs">
+                    <span className="text-slate-200">{page.label}</span>
+                    <span className={page.status === "online" ? "text-emerald-300" : "text-amber-300"}>
+                      {page.status === "online" ? `${page.httpStatus} · ${page.latencyMs} ms` : page.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+              <h3 className="mb-3 text-sm font-semibold text-white">Data and science</h3>
+              <dl className="space-y-2 text-xs">
+                {[
+                  ["Featured sky regions", overview.archive.regions],
+                  ["Archive observations", overview.archive.observations],
+                  ["Prepared comparisons", overview.archive.comparisons],
+                  ["Change candidates", overview.archive.candidates],
+                  ["Candidate reviews", overview.reviews.candidateReviews],
+                ].map(([label, value]) => (
+                  <div key={label} className="flex justify-between gap-3 border-b border-slate-800 pb-2">
+                    <dt className="text-slate-400">{label}</dt><dd className="font-semibold text-slate-100">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-3 text-xs text-slate-400">
+                {overview.mode === "local-archive"
+                  ? "Local archive is serving saved data. New science jobs need MySQL and the worker."
+                  : "Live database counts and local asset availability are shown above."}
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Beginner Guide Explainer */}
       <BeginnerExplainer
         pageTitle="System Operations & Administration"
-        pagePurpose="This dashboard lets administrators and scientists monitor server health, observe background Astropy reprojection tasks, manage the scientific processing queue, and monitor disk storage for FITS images and previews."
+        pagePurpose="Check public pages, archive images, saved reviews, server health, background science jobs, and storage in one place."
         items={[
           {
             icon: <RiServerLine className="w-4 h-4 text-cyan-400" />,
@@ -304,6 +409,11 @@ function AdminConsole() {
       />
 
       {/* Action Notification Banner */}
+      {status?.mode === "local-archive" && (
+        <div role="status" className="p-3.5 rounded-xl border border-amber-800/60 bg-amber-950/30 text-amber-200 text-xs">
+          Local archive mode: sign-in, storage monitoring, and cache controls are available. Processing jobs require MySQL and the science worker.
+        </div>
+      )}
       {actionMessage && (
         <div
           className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 text-xs ${
@@ -348,13 +458,13 @@ function AdminConsole() {
 
           <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
             <div className="flex items-center justify-between text-slate-400 text-xs font-mono">
-              <span>MySQL Database</span>
+              <span>{status.mode === "local-archive" ? "Local archive" : "MySQL Database"}</span>
               <RiDatabase2Line className="w-4 h-4 text-cyan-400" />
             </div>
             <div className="flex items-center gap-2">
               <div
                 className={`w-2.5 h-2.5 rounded-full ${
-                  status.databaseHealth === "connected" ? "bg-emerald-400" : "bg-rose-400"
+                  status.databaseHealth === "connected" ? "bg-emerald-400" : status.databaseHealth === "local" ? "bg-amber-400" : "bg-rose-400"
                 }`}
               />
               <span className="text-lg font-bold text-white capitalize">{status.databaseHealth}</span>

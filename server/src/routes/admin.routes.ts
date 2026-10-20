@@ -3,6 +3,7 @@ import {
   login,
   logout,
   getStatus,
+  getOverview,
   getJobs,
   retryJob,
   cancelJob,
@@ -21,6 +22,7 @@ const router = Router();
 router.post("/login", validate({ body: adminLoginSchema }), login);
 router.post("/logout", adminAuth, logout);
 router.get("/status", adminAuth, getStatus);
+router.get("/overview", adminAuth, getOverview);
 router.get("/jobs", adminAuth, getJobs);
 router.post(
   "/jobs/:id/retry",

@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "build:standalone": "next build && node ../scripts/prepare-standalone.mjs",
-    "start": "next start",
+    "build": "next build --webpack",
+    "build:standalone": "npm run build && node ../scripts/prepare-standalone.mjs",
+    "start": "node .next/standalone/server.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },

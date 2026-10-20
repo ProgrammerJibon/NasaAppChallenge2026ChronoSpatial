@@ -34,15 +34,13 @@ export function SkyImageViewer({
   observationId,
   src,
   alt,
-  ra = 0,
-  dec = 0,
   candidates = [],
   className = "",
 }: SkyImageViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [cursorPos, setCursorPos] = useState<{ x: number; y: number; ra: number; dec: number } | null>(null);
+  const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const zoom = useViewerStore((s) => s.zoom);
@@ -55,13 +53,6 @@ export function SkyImageViewer({
   const setCrosshairEnabled = useViewerStore((s) => s.setCrosshairEnabled);
 
   useEffect(() => { resetView(); }, [observationId, src, resetView]);
-
-  // Wheel zoom
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.2 : 0.2;
-    setZoom((prev) => Math.min(8, Math.max(0.8, prev + delta)));
-  };
 
   // Drag pan
   const handleMouseDown = (e: React.PointerEvent) => {
@@ -82,19 +73,13 @@ export function SkyImageViewer({
         const normX = ((e.clientX - rect.left) / rect.width) * 100;
         const normY = ((e.clientY - rect.top) / rect.height) * 100;
 
-        // Approximate RA/Dec offset from center based on 0.25 deg field
-        const offsetRa = ((normX - 50) / 100) * 0.25;
-        const offsetDec = ((50 - normY) / 100) * 0.25;
-
         setCursorPos({
           x: normX,
           y: normY,
-          ra: Number((ra + offsetRa).toFixed(4)),
-          dec: Number((dec + offsetDec).toFixed(4)),
         });
       }
     },
-    [isDragging, dragStart, setPan, ra, dec]
+    [isDragging, dragStart, setPan]
   );
 
   const handleMouseUp = () => {

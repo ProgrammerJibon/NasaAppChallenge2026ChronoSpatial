@@ -3,6 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "standalone",
   reactStrictMode: true,
+  async rewrites() {
+    const apiOrigin = (process.env.API_UPSTREAM_ORIGIN || "http://127.0.0.1:4000").replace(/\/$/, "");
+    return [{ source: "/api/:path*", destination: `${apiOrigin}/api/:path*` }];
+  },
   images: {
     remotePatterns: [
       {

@@ -1,6 +1,6 @@
 import type { SkyRegion } from "./types";
 export function shortFieldName(region:SkyRegion):string {
-  const names:Record<string,string>={m31:"Andromeda",orion:"Orion",pleiades:"Pleiades","galactic-center":"Milky Way center","south-ecliptic-pole":"Deep field"};
+  const names:Record<string,string>={m31:"Andromeda vicinity",orion:"Orion field",pleiades:"Pleiades field","galactic-center":"Galactic center area","south-ecliptic-pole":"South ecliptic field"};
   return names[region.slug] ?? region.name;
 }
 export function matchSkyField(text:string,regions:SkyRegion[]):SkyRegion | undefined {
