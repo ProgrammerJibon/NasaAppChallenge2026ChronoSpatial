@@ -1,15 +1,16 @@
 "use client";
 import { useState, type ReactNode } from "react";
 import { RiPauseLine, RiPlayLine } from "react-icons/ri";
+import { VisualJourney } from "./VisualJourney";
 import { MissionGuide } from "./MissionGuide";
 import { SpaceScene, type SceneKind } from "./SpaceScene";
 import type { GuideTopic } from "@/lib/missionGuide";
 
-export function MissionWorkspace({title,subtitle,scene="planet",welcome,context,topics,children}:{title:string;subtitle:string;scene?:SceneKind;welcome:string;context?:string;topics:GuideTopic[];children:ReactNode}) {
+export function MissionWorkspace({title,subtitle,scene="planet",welcome,context,topics,children,showIntro=true,showJourney=true}:{title:string;subtitle:string;scene?:SceneKind;welcome:string;context?:string;topics:GuideTopic[];children:ReactNode;showIntro?:boolean;showJourney?:boolean}) {
   const [paused,setPaused] = useState(false);
   return <div className={`mission-shell ${paused ? "effects-paused" : ""}`}>
-    <header className="mission-intro"><div><span className="mission-eyebrow">CHRONO & SPATIAL / YOUR OBSERVATORY</span><h1>{title}</h1><p>{subtitle}</p></div><SpaceScene kind={scene} /><button className="effects-toggle" type="button" aria-label={paused ? "Play decorative effects" : "Pause decorative effects"} onClick={()=>setPaused(p=>!p)}>{paused ? <RiPlayLine/> : <RiPauseLine/>}<span>{paused ? "Play effects" : "Pause effects"}</span></button></header>
-    <div className="mission-layout"><div className="mission-content">{children}</div><MissionGuide welcome={welcome} context={context} topics={topics} /></div>
+    {showIntro && <header className={`mission-intro mission-intro-${scene}`}><div><span className="mission-eyebrow">CHRONO & SPATIAL / YOUR OBSERVATORY</span><h1>{title}</h1><p>{subtitle}</p></div><SpaceScene kind={scene} paused={paused} />{scene === "blackhole" && <a className="blackhole-credit" href="https://svs.gsfc.nasa.gov/13326" target="_blank" rel="noreferrer">Illustrative scene · NASA black hole simulation ↗</a>}<button className="effects-toggle" type="button" aria-label={paused ? "Play decorative effects" : "Pause decorative effects"} onClick={()=>setPaused(p=>!p)}>{paused ? <RiPlayLine/> : <RiPauseLine/>}<span>{paused ? "Play effects" : "Pause effects"}</span></button></header>}
+    {showJourney && <VisualJourney paused={paused} />}<div className="mission-layout"><div className="mission-content">{children}</div><details className="guide-drawer"><summary><span>✦ Ask your mission guide</span><span>Help & questions +</span></summary><MissionGuide welcome={welcome} context={context} topics={topics} /></details></div>
   </div>;
 }
 export function ScienceDetails({children,title="Scientific details",open,onToggle}:{children:ReactNode;title?:string;open?:boolean;onToggle?:(open:boolean)=>void}) {

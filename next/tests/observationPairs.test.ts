@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { compatibleEpochs, findEpochPair } from "../lib/observationPairs";
 import type { Observation } from "../lib/types";
-const observation = (id:string,date:string,band=4,region="m31",min=2.85,max=3.45) => ({id,region_id:region,observation_date:date,band_number:band,wavelength_min_um:min,wavelength_max_um:max} as Observation);
+const observation = (id:string,date:string,band=4,region="m31",min=2.85,max=3.45,ra=10.1) => ({id,region_id:region,observation_date:date,band_number:band,wavelength_min_um:min,wavelength_max_um:max,ra,dec:39.14,width:35,height:35,metadata_json:{wcs:{crval1:ra,crval2:39.14,cdelt1:-0.0017,cdelt2:0.0017,ctype1:"RA---TAN",ctype2:"DEC--TAN"}}} as Observation);
 describe("temporal comparison selection",() => {
   const a=observation("a","2025-07-09");
   const b=observation("b","2026-07-10");
@@ -14,6 +14,9 @@ describe("temporal comparison selection",() => {
   });
   it("rejects incompatible wavelengths within a detector band",() => {
     expect(compatibleEpochs(a,observation("wave","2026-07-10",4,"m31",3.1,3.7))).toBe(false);
+  });
+  it("rejects exposures in the same named field that do not overlap on the sky",() => {
+    expect(compatibleEpochs(a,observation("distant","2026-07-10",4,"m31",2.85,3.45,11.5))).toBe(false);
   });
   it("uses the longest available interval and preserves the selected observation",() => {
     const middle=observation("middle","2025-12-01");

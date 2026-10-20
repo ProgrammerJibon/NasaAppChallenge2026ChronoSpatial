@@ -24,6 +24,17 @@ const envSchema = z.object({
   ADMIN_SESSION_TTL_HOURS: z.coerce.number().default(24),
   RATE_LIMIT_SEARCH_PER_MINUTE: z.coerce.number().default(60),
   RATE_LIMIT_REVIEW_PER_MINUTE: z.coerce.number().default(120),
+}).superRefine((config, context) => {
+  if (config.NODE_ENV === "production" && (
+    config.ADMIN_PASSWORD.length < 16 ||
+    ["spherex_admin_secret_2025", "spherex_admin_2026!", "change-me-before-publishing"].includes(config.ADMIN_PASSWORD)
+  )) {
+    context.addIssue({
+      code: "custom",
+      path: ["ADMIN_PASSWORD"],
+      message: "Set a unique admin password of at least 16 characters before starting in production.",
+    });
+  }
 });
 
 const parsed = envSchema.safeParse(process.env);

@@ -2,7 +2,7 @@ export const APP_NAME = "Chrono & Spatial";
 export const APP_SUBTITLE = "SPHEREx Sky Change Explorer";
 
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000/api";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
 
 export const SPHEREX_DETECTORS = [
   { id: 1, name: "Band 1", range: "0.75 – 1.11 µm", color: "#38bdf8" },

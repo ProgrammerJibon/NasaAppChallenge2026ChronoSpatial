@@ -9,6 +9,7 @@ import observationsRoutes from "./routes/observations.routes.js";
 import jobsRoutes from "./routes/jobs.routes.js";
 import comparisonsRoutes from "./routes/comparisons.routes.js";
 import reviewsRoutes from "./routes/reviews.routes.js";
+import observationReviewsRoutes from "./routes/observation-reviews.routes.js";
 import filesRoutes from "./routes/files.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -45,6 +46,7 @@ export function createApp() {
   apiRouter.use("/jobs", jobsRoutes);
   apiRouter.use("/comparisons", comparisonsRoutes);
   apiRouter.use("/reviews", reviewsRoutes);
+  apiRouter.use("/observation-reviews", observationReviewsRoutes);
   apiRouter.use("/review", reviewsRoutes); // Supports /api/review/next
   apiRouter.use("/files", filesRoutes);
   apiRouter.use("/admin", adminRoutes);

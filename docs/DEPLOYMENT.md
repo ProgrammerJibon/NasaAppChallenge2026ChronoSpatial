@@ -24,6 +24,8 @@ cp server/.env.example server/.env
 cp next/.env.example next/.env.local
 ```
 
+The browser calls `/api` on the same host as the frontend. Next.js proxies those requests to `API_UPSTREAM_ORIGIN`, which must be reachable by the Next.js server. Set it to the deployed API origin **before building** the frontend; do not leave it pointing at a local development server. For example, if the API runs at `https://api.example.org`, set `API_UPSTREAM_ORIGIN=https://api.example.org` (without `/api`). Keep `NEXT_PUBLIC_API_BASE_URL=/api` so a published browser never tries to contact its own `localhost`.
+
 ### 2.2 Configure Database Credentials (`server/.env`)
 Ensure MySQL is accessible:
 ```env
@@ -34,12 +36,12 @@ DB_PORT=3306
 DB_USER=root
 DB_PASSWORD=
 DB_NAME=spherex_atlas
-ADMIN_PASSWORD=spherex_admin_2026!
+ADMIN_PASSWORD=<a-unique-secret-of-at-least-16-characters>
 STORAGE_PATH=../storage
 CORS_ORIGIN=http://localhost:3000
 ```
 
-> **Note**: You do not need to manually create the `spherex_atlas` database. The server auto-creates the database, runs migrations, and seeds the demo dataset on startup.
+> **Note**: You do not need to manually create the `spherex_atlas` database. The server auto-creates the database, runs migrations, and seeds the demo dataset on startup. Set `NODE_ENV=production` and a unique admin password of at least 16 characters before publishing; the API refuses to start in production with the example or old default password.
 
 ---
 
@@ -109,8 +111,11 @@ npm run test:python
 # Build Server production bundle
 npm run build:server
 
-# Build Next.js production bundle
-npm run build:next
+# Build a runnable Next.js standalone bundle (includes public images and videos)
+npm --prefix next run build:standalone
+
+# Start the standalone frontend after building it
+npm --prefix next start
 ```
 
 ---
@@ -120,3 +125,5 @@ npm run build:next
 - **Tier 1 (Frontend)**: Deploy `next/` to Vercel, Cloudflare Pages, or containerize with standard Node.js standalone output.
 - **Tier 2 (API Gateway)**: Containerize `server/` with Docker, bind to private MySQL and shared persistent volume mounted at `/app/storage`.
 - **Tier 3 (Worker Daemon)**: Deploy `python/` as a scalable Kubernetes replica set or systemd daemon pointing to the same MySQL database and persistent volume `/app/storage`.
+
+Before opening the site to visitors, confirm that `/api/health` works through the frontend domain and that an observation preview loads. Production requires MySQL to start. In development, an unavailable MySQL server triggers the bundled local archive: viewing and SQLite-backed observation reviews remain available, while new processing jobs do not run. Keep the storage volume persistent so saved reviews survive restarts.

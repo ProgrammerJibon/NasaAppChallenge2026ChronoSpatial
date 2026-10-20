@@ -1414,22 +1414,19 @@ interface LanguageStore {
   t: (key: string, fallback?: string) => string;
 }
 
-const getInitialLanguage = (): Language => {
-  if (typeof window !== "undefined") {
-    try {
-      const stored = localStorage.getItem("spherex_lang");
-      if (stored && LANGUAGES.some((l) => l.code === stored)) {
-        return stored as Language;
-      }
-    } catch {
-      // ignore
-    }
-  }
-  return "en";
+const HOME_TRANSLATIONS: Record<Language, Record<string, string>> = {
+  en: { homeEyebrow:"YOUR WINDOW INTO THE INFRARED UNIVERSE", homeTitleOne:"The universe changes.", homeTitleTwo:"Look closer.", homeIntro:"One sky. Different moments. Explore the observations and look for what changed.", homeExplore:"Explore the sky", homeWatch:"Watch a comparison", homeBegin:"BEGIN EXPLORING", homeIllustration:"Illustrated observatory · real observations below", homeArchive:"Observation archive: NASA / IPAC IRSA", homeCompareEyebrow:"TWO MOMENTS IN THE SAME SKY", homeCompareOne:"Look once.", homeCompareTwo:"Then look again.", homeComparePrefix:"Explore", homeCompareSuffix:"across two dates. A difference is a starting point for investigation.", homeBeyond:"There’s more to light than we can see.", homeDestinations:"Where will you look?", homeMethod:"See how it works.", homeNext:"Your turn to look closer." },
+  bn: { homeEyebrow:"অবলোহিত মহাবিশ্ব দেখার জানালা", homeTitleOne:"মহাবিশ্ব বদলে যায়।", homeTitleTwo:"আরও কাছে দেখুন।", homeIntro:"একই আকাশ, ভিন্ন সময়। পর্যবেক্ষণগুলো দেখুন এবং কী বদলেছে খুঁজুন।", homeExplore:"আকাশ অন্বেষণ করুন", homeWatch:"তুলনা দেখুন", homeBegin:"অন্বেষণ শুরু করুন", homeIllustration:"চিত্রিত মানমন্দির · নিচে বাস্তব পর্যবেক্ষণ", homeArchive:"পর্যবেক্ষণ আর্কাইভ: NASA / IPAC IRSA", homeCompareEyebrow:"একই আকাশের দুই সময়", homeCompareOne:"একবার দেখুন।", homeCompareTwo:"আবার দেখুন।", homeComparePrefix:"দেখুন", homeCompareSuffix:"দুই তারিখে। পার্থক্য অনুসন্ধানের সূচনা হতে পারে।", homeBeyond:"আলোর অনেক কিছুই চোখে দেখা যায় না।", homeDestinations:"কোথায় দেখতে চান?", homeMethod:"পদ্ধতিটি দেখুন।", homeNext:"এবার আপনিই খুঁজে দেখুন।" },
+  hi: { homeEyebrow:"अवरक्त ब्रह्मांड की आपकी खिड़की", homeTitleOne:"ब्रह्मांड बदलता है।", homeTitleTwo:"और करीब से देखें।", homeIntro:"एक ही आकाश, अलग-अलग समय। अवलोकन देखें और बदलाव खोजें।", homeExplore:"आकाश देखें", homeWatch:"तुलना देखें", homeBegin:"खोजना शुरू करें", homeIllustration:"चित्रित वेधशाला · नीचे वास्तविक अवलोकन", homeArchive:"अवलोकन संग्रह: NASA / IPAC IRSA", homeCompareEyebrow:"एक ही आकाश के दो पल", homeCompareOne:"एक बार देखें।", homeCompareTwo:"फिर से देखें।", homeComparePrefix:"देखें", homeCompareSuffix:"दो तारीखों पर। अंतर जाँच की शुरुआत है।", homeBeyond:"प्रकाश में जितना दिखता है, उससे कहीं अधिक है।", homeDestinations:"आप कहाँ देखेंगे?", homeMethod:"जानें यह कैसे काम करता है।", homeNext:"अब आपकी बारी है।" },
+  de: { homeEyebrow:"DEIN FENSTER ZUM INFRAROTUNIVERSUM", homeTitleOne:"Das Universum verändert sich.", homeTitleTwo:"Sieh genauer hin.", homeIntro:"Ein Himmel, verschiedene Momente. Entdecke die Aufnahmen und finde Veränderungen.", homeExplore:"Himmel erkunden", homeWatch:"Vergleich ansehen", homeBegin:"ENTDECKUNG STARTEN", homeIllustration:"Illustriertes Observatorium · echte Aufnahmen unten", homeArchive:"Beobachtungsarchiv: NASA / IPAC IRSA", homeCompareEyebrow:"ZWEI MOMENTE AM GLEICHEN HIMMEL", homeCompareOne:"Einmal hinsehen.", homeCompareTwo:"Dann noch einmal.", homeComparePrefix:"Erkunde", homeCompareSuffix:"an zwei Tagen. Ein Unterschied ist ein Ausgangspunkt für weitere Untersuchungen.", homeBeyond:"Licht zeigt mehr, als wir sehen können.", homeDestinations:"Wohin schaust du?", homeMethod:"So funktioniert es.", homeNext:"Jetzt bist du dran." },
+  ja: { homeEyebrow:"赤外線宇宙への窓", homeTitleOne:"宇宙は変化する。", homeTitleTwo:"もっと近くで見よう。", homeIntro:"同じ空の異なる瞬間。観測画像を見て、変化を探しましょう。", homeExplore:"空を探索", homeWatch:"比較を見る", homeBegin:"探索を始める", homeIllustration:"イラストの天文台 · 下に実際の観測画像", homeArchive:"観測アーカイブ: NASA / IPAC IRSA", homeCompareEyebrow:"同じ空の二つの瞬間", homeCompareOne:"一度見る。", homeCompareTwo:"もう一度見る。", homeComparePrefix:"観察する", homeCompareSuffix:"二つの日付で。違いは調査の出発点です。", homeBeyond:"目に見えない光もあります。", homeDestinations:"次はどこを見る？", homeMethod:"仕組みを見る。", homeNext:"次はあなたの番です。" },
+  es: { homeEyebrow:"TU VENTANA AL UNIVERSO INFRARROJO", homeTitleOne:"El universo cambia.", homeTitleTwo:"Mira más de cerca.", homeIntro:"Un cielo, distintos momentos. Explora las observaciones y busca qué cambió.", homeExplore:"Explorar el cielo", homeWatch:"Ver comparación", homeBegin:"EMPEZAR A EXPLORAR", homeIllustration:"Observatorio ilustrado · observaciones reales abajo", homeArchive:"Archivo de observaciones: NASA / IPAC IRSA", homeCompareEyebrow:"DOS MOMENTOS DEL MISMO CIELO", homeCompareOne:"Mira una vez.", homeCompareTwo:"Y mira de nuevo.", homeComparePrefix:"Explora", homeCompareSuffix:"en dos fechas. Una diferencia es el comienzo de una investigación.", homeBeyond:"La luz revela más de lo que vemos.", homeDestinations:"¿Dónde mirarás?", homeMethod:"Mira cómo funciona.", homeNext:"Ahora te toca mirar de cerca." },
+  fr: { homeEyebrow:"VOTRE FENÊTRE SUR L’UNIVERS INFRAROUGE", homeTitleOne:"L’univers change.", homeTitleTwo:"Regardez de plus près.", homeIntro:"Un ciel, plusieurs instants. Explorez les observations et cherchez ce qui a changé.", homeExplore:"Explorer le ciel", homeWatch:"Voir la comparaison", homeBegin:"COMMENCER L’EXPLORATION", homeIllustration:"Observatoire illustré · vraies observations ci-dessous", homeArchive:"Archives d’observation : NASA / IPAC IRSA", homeCompareEyebrow:"DEUX INSTANTS DU MÊME CIEL", homeCompareOne:"Regardez une fois.", homeCompareTwo:"Puis regardez encore.", homeComparePrefix:"Explorez", homeCompareSuffix:"à deux dates. Une différence est le début d’une enquête.", homeBeyond:"La lumière dépasse ce que nos yeux voient.", homeDestinations:"Où regarderez-vous ?", homeMethod:"Découvrez la méthode.", homeNext:"À vous de regarder de plus près." },
+  ar: { homeEyebrow:"نافذتك إلى الكون بالأشعة تحت الحمراء", homeTitleOne:"الكون يتغير.", homeTitleTwo:"انظر عن قرب.", homeIntro:"سماء واحدة في أوقات مختلفة. استكشف الرصد وابحث عما تغير.", homeExplore:"استكشف السماء", homeWatch:"شاهد المقارنة", homeBegin:"ابدأ الاستكشاف", homeIllustration:"مرصد مصوّر · مشاهدات حقيقية أدناه", homeArchive:"أرشيف الرصد: NASA / IPAC IRSA", homeCompareEyebrow:"لحظتان في السماء نفسها", homeCompareOne:"انظر مرة.", homeCompareTwo:"ثم انظر مجددًا.", homeComparePrefix:"استكشف", homeCompareSuffix:"في تاريخين مختلفين. الاختلاف بداية للتحقق.", homeBeyond:"الضوء أكثر مما تراه أعيننا.", homeDestinations:"أين ستنظر؟", homeMethod:"شاهد كيف يعمل.", homeNext:"حان دورك لتنظر عن قرب." },
 };
 
 export const useLanguage = create<LanguageStore>((set, get) => ({
-  language: getInitialLanguage(),
+  language: "en",
   setLanguage: (language: Language) => {
     try {
       if (typeof window !== "undefined") {
@@ -1445,6 +1442,6 @@ export const useLanguage = create<LanguageStore>((set, get) => ({
   },
   t: (key: string, fallback?: string) => {
     const lang = get().language;
-    return TRANSLATIONS[lang]?.[key] || TRANSLATIONS.en[key] || fallback || key;
+    return HOME_TRANSLATIONS[lang]?.[key] || TRANSLATIONS[lang]?.[key] || HOME_TRANSLATIONS.en[key] || TRANSLATIONS.en[key] || fallback || key;
   },
 }));

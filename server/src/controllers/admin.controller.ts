@@ -5,6 +5,7 @@ import { env } from "../config/env.js";
 import { query, execute } from "../db/connection.js";
 import { generateId, generateToken, hashToken } from "../utils/hash.js";
 import { sendSuccess, sendError } from "../utils/response.js";
+import { checkArchiveAssets, checkPublicPages } from "../services/platform-monitor.service.js";
 import {
   listJobs,
   retryJob as retryJobService,
@@ -84,6 +85,31 @@ export async function getStatus(_req: Request, res: Response) {
       },
     },
     uptimeSeconds: Math.floor(process.uptime()),
+  });
+}
+
+export async function getOverview(_req: Request, res: Response) {
+  const [site, regions, observations, comparisons, candidates, observationReviews, candidateReviews] = await Promise.all([
+    checkPublicPages(),
+    query<{ c: number }>("SELECT COUNT(*) AS c FROM sky_regions"),
+    query<{ preview_path: string | null }>("SELECT preview_path FROM observations"),
+    query<{ aligned_a_path: string | null; aligned_b_path: string | null; difference_path: string | null; significance_path: string | null }>(
+      "SELECT aligned_a_path, aligned_b_path, difference_path, significance_path FROM comparisons"),
+    query<{ c: number }>("SELECT COUNT(*) AS c FROM change_candidates"),
+    query<{ c: number; last_at: Date | null }>("SELECT COUNT(*) AS c, MAX(updated_at) AS last_at FROM observation_reviews"),
+    query<{ c: number }>("SELECT COUNT(*) AS c FROM reviews"),
+  ]);
+  const [previews, comparisonAssets] = await Promise.all([
+    checkArchiveAssets(observations.map(row => row.preview_path), "previews"),
+    checkArchiveAssets(comparisons.flatMap(row => [row.aligned_a_path, row.aligned_b_path, row.difference_path, row.significance_path]), "comparisons"),
+  ]);
+  return sendSuccess(res, {
+    checkedAt: new Date().toISOString(), mode: "database", site,
+    archive: { regions: Number(regions[0]?.c || 0), observations: observations.length,
+      comparisons: comparisons.length, candidates: Number(candidates[0]?.c || 0), previews, comparisonAssets },
+    reviews: { observationReviews: Number(observationReviews[0]?.c || 0),
+      candidateReviews: Number(candidateReviews[0]?.c || 0),
+      lastAt: observationReviews[0]?.last_at ? new Date(observationReviews[0].last_at).toISOString() : null },
   });
 }
 

@@ -6,9 +6,12 @@ node_modules/
 # Next.js Build
 next/.next/
 next/out/
+next/next-env.d.ts
+*.tsbuildinfo
 
 # Server Build
 server/dist/
+.local/
 
 # Python Cache & Environments
 __pycache__/
@@ -32,6 +35,9 @@ storage/cache/*
 !storage/cache/.gitkeep
 storage/logs/*
 !storage/logs/.gitkeep
+storage/*.sqlite*
+storage/differences/comp-*.webp
+next/AGENTS.md
 
 # Operating System Files
 .DS_Store
