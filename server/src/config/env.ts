@@ -1,4 +1,5 @@
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import dotenv from "dotenv";
 import { z } from "zod";
 
@@ -6,8 +7,19 @@ import { z } from "zod";
 // holds the shared api.nasa.gov credential. `override: false` is the default,
 // so nothing already set by the environment or server/.env is replaced and the
 // root file is never rewritten.
+//
+// The root file is looked for both relative to the working directory and
+// relative to this module, so the credential is found whether the server is
+// started from `server/` or by a process manager with a different cwd.
 dotenv.config();
-dotenv.config({ path: path.resolve(process.cwd(), "..", ".env") });
+const moduleDir = path.dirname(fileURLToPath(import.meta.url));
+for (const candidate of [
+  path.resolve(process.cwd(), "..", ".env"),
+  path.resolve(moduleDir, "..", "..", "..", ".env"), // src|dist/config -> server -> repo root
+  path.resolve(moduleDir, "..", "..", "..", "..", ".env"),
+]) {
+  dotenv.config({ path: candidate });
+}
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),

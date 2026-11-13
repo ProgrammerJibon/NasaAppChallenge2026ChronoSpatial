@@ -426,11 +426,22 @@ npm run verify
 
 ```bash
 npm run verify:structure   # Architectural boundary checks
-npm run test:next          # Frontend unit tests (Vitest)
-npm run test:server        # API, NASA unit and NASA live tests (Vitest)
-npm run test:python        # Science, job and NASA live tests (pytest)
+npm run test:next          # Frontend unit tests (Vitest)        — 36 tests
+npm run test:server        # API + NASA unit + NASA live tests   — 73 tests
+npm run test:python        # Science + job + NASA live tests     — 68 tests
 npm run typecheck          # tsc --noEmit for both TypeScript tiers
 ```
+
+The server and Python suites each contain a dedicated NASA integration file:
+
+| File | Network | Covers |
+|---|---|---|
+| `server/tests/nasa-integrations.test.ts` | offline | ObsCore normalisation, MJD conversion, sexagesimal formatting, Horizons CSV parsing, identifier reconciliation, request guards |
+| `server/tests/nasa-live.test.ts` | live | IRSA SIA2 discovery, SBDB, Horizons, Small-Body Identification, NeoWs, and the HTTP routes over them |
+| `python/tests/test_irsa.py` | offline | Collection validation, detector mapping, product normalisation, cutout URLs, cache eviction |
+| `python/tests/test_jpl.py` | offline | Coordinate round-trips, Horizons parsing, angular separation, candidate cross-matching |
+| `python/tests/test_jobs.py` | offline | All three job handlers against a recording database stub and a synthetic SPHEREx FITS file |
+| `python/tests/test_live_nasa.py` | live | Real discovery, real cutout download and FITS parsing, real ephemerides, cross-service validation |
 
 ### Running without network access
 

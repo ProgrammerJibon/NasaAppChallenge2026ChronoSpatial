@@ -4,7 +4,6 @@ import math
 
 import pytest
 
-from spherex import jpl
 from spherex.jpl import (
     JPLError,
     angular_separation_arcsec,

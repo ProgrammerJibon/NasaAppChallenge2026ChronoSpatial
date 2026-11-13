@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
 import { app } from "../src/app.js";
-import { closePool, query } from "../src/db/connection.js";
+import { closePool, execute, query } from "../src/db/connection.js";
 
 describe("SPHEREx Sky Change Explorer API Endpoints", () => {
   afterAll(async () => {
@@ -151,10 +151,32 @@ describe("SPHEREx Sky Change Explorer API Endpoints", () => {
     });
 
     it("queues an archive fetch for a position with no local coverage", async () => {
-      // A deliberately obscure position that no part of this project ingests.
+      // Any sky position can become cached once the worker ingests there, so
+      // pick one that is provably far from everything already in the archive
+      // rather than hoping a hard-coded coordinate stays empty.
+      const ingested = await query<{ ra: number; dec: number }>(
+        "SELECT ra, `dec` FROM observations"
+      );
+      const separationDeg = (ra: number, dec: number, b: { ra: number; dec: number }) => {
+        const d2r = Math.PI / 180;
+        const cos =
+          Math.sin(dec * d2r) * Math.sin(Number(b.dec) * d2r) +
+          Math.cos(dec * d2r) * Math.cos(Number(b.dec) * d2r) * Math.cos((ra - Number(b.ra)) * d2r);
+        return Math.acos(Math.min(1, Math.max(-1, cos))) / d2r;
+      };
+
+      let target: { ra: number; dec: number } | null = null;
+      for (let step = 0; step < 72 && !target; step += 1) {
+        const candidate = { ra: (step * 37 + 11) % 360, dec: ((step * 13) % 140) - 70 };
+        if (ingested.every((row) => separationDeg(candidate.ra, candidate.dec, row) > 5)) {
+          target = candidate;
+        }
+      }
+      expect(target, "no uncovered sky position available").not.toBeNull();
+
       const res = await request(app)
         .post("/api/observations/search")
-        .send({ ra: 311.73, dec: -41.29, radiusDeg: 0.02 });
+        .send({ ra: target!.ra, dec: target!.dec, radiusDeg: 0.02 });
 
       expect(res.status).toBe(200);
       expect(res.body.data.status).toBe("queued");
@@ -162,6 +184,12 @@ describe("SPHEREx Sky Change Explorer API Endpoints", () => {
 
       const jobRes = await request(app).get(`/api/jobs/${res.body.data.jobId}`);
       expect(jobRes.body.data.type).toBe("FETCH_OBSERVATIONS");
+
+      // Leave the queue as it was found: a running worker must not start
+      // downloading from IRSA because the test suite ran.
+      await execute("UPDATE processing_jobs SET status = 'cancelled' WHERE id = ?", [
+        res.body.data.jobId,
+      ]);
     });
   });
 
