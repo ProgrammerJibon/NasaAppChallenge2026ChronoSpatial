@@ -11,6 +11,8 @@ import comparisonsRoutes from "./routes/comparisons.routes.js";
 import reviewsRoutes from "./routes/reviews.routes.js";
 import observationReviewsRoutes from "./routes/observation-reviews.routes.js";
 import filesRoutes from "./routes/files.routes.js";
+import archiveRoutes from "./routes/archive.routes.js";
+import solarSystemRoutes from "./routes/solar-system.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { notFoundHandler } from "./middleware/notFound.js";
@@ -48,6 +50,8 @@ export function createApp() {
   apiRouter.use("/reviews", reviewsRoutes);
   apiRouter.use("/observation-reviews", observationReviewsRoutes);
   apiRouter.use("/review", reviewsRoutes); // Supports /api/review/next
+  apiRouter.use("/archive", archiveRoutes);
+  apiRouter.use("/solar-system", solarSystemRoutes);
   apiRouter.use("/files", filesRoutes);
   apiRouter.use("/admin", adminRoutes);
 

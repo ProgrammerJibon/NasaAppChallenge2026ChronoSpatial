@@ -7,6 +7,41 @@ from astropy.wcs import WCS
 from scipy.interpolate import RegularGridInterpolator
 from .config import MAX_PIXELS
 
+# SPHEREx L2 mask planes that mark a pixel's context rather than a defect.
+# SOURCE is set on every pixel that contains astrophysical signal, so in a
+# crowded field it covers the whole array; treating it as a defect would reject
+# exactly the pixels the platform is looking at.
+NOMINAL_FLAG_NAMES = frozenset({"SOURCE"})
+
+# Fallback when a product carries no MSKN/MSKM plane dictionary: SOURCE is
+# plane 21 in the published SPHEREx Level-2 data model.
+DEFAULT_NOMINAL_FLAGS = np.uint32(1 << 21)
+
+
+def nominal_flag_mask(header: fits.Header) -> np.uint32:
+    """Bits that must not disqualify a pixel, read from the product itself.
+
+    SPHEREx Level-2 FLAGS extensions document their own bit planes with paired
+    ``MSKN<nnnn>`` (name) and ``MSKM<nnnn>`` (bitmask) keywords. Reading them
+    means the pipeline keeps working if the mission renumbers a plane, instead
+    of silently rejecting every pixel.
+    """
+    bits = np.uint32(0)
+    found = False
+    for keyword, value in header.items():
+        if not keyword.startswith("MSKN"):
+            continue
+        index = keyword[4:]
+        if not index.isdigit():
+            continue
+        found = True
+        if str(value).strip().upper() in NOMINAL_FLAG_NAMES:
+            mask_keyword = f"MSKM{index}"
+            bit = header.get(mask_keyword)
+            bits |= np.uint32(int(bit)) if bit is not None else np.uint32(1 << int(index))
+    return bits if found else DEFAULT_NOMINAL_FLAGS
+
+
 @dataclass
 class ImagePlane:
     image: np.ndarray
@@ -17,13 +52,13 @@ class ImagePlane:
     primary: fits.Header
     wave: tuple | None
     zodi: np.ndarray | None
+    nominal_flags: np.uint32 = DEFAULT_NOMINAL_FLAGS
 
     @property
     def mask(self) -> np.ndarray:
-        # SOURCE (bit 21) is nominal in SPHEREx, not a bad-pixel flag
-        valid = np.isfinite(self.image) & (
-            (self.flags & np.uint32(0xFFFFFFFF ^ (1 << 21))) == 0
-        )
+        """True where a pixel must not be used for photometry."""
+        disqualifying = np.uint32(0xFFFFFFFF) ^ np.uint32(self.nominal_flags)
+        valid = np.isfinite(self.image) & ((self.flags & disqualifying) == 0)
         if self.variance is not None:
             valid &= np.isfinite(self.variance) & (self.variance > 0)
         return ~valid
@@ -51,11 +86,12 @@ def read_fits(path) -> ImagePlane:
         variance = (
             np.array(hdus["VARIANCE"].data, dtype=float) if "VARIANCE" in hdus else None
         )
-        flags = (
-            np.array(hdus["FLAGS"].data, dtype=np.uint32)
-            if "FLAGS" in hdus
-            else np.zeros(image.shape, dtype=np.uint32)
-        )
+        if "FLAGS" in hdus:
+            flags = np.array(hdus["FLAGS"].data, dtype=np.uint32)
+            nominal_flags = nominal_flag_mask(hdus["FLAGS"].header)
+        else:
+            flags = np.zeros(image.shape, dtype=np.uint32)
+            nominal_flags = DEFAULT_NOMINAL_FLAGS
         
         if flags.shape != image.shape or (
             variance is not None and variance.shape != image.shape
@@ -101,6 +137,7 @@ def read_fits(path) -> ImagePlane:
             primary=hdus[0].header.copy(),
             wave=wave,
             zodi=np.array(hdus["ZODI"].data, dtype=float) if "ZODI" in hdus else None,
+            nominal_flags=nominal_flags,
         )
 
 def get_plane_metadata(plane: ImagePlane) -> dict:

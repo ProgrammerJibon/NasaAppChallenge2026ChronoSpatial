@@ -20,6 +20,26 @@ def encode_json(data):
         return None
     return json.dumps(data, default=default_json)
 
+def decode_json(value, default=None):
+    """Read a MySQL JSON column.
+
+    PyMySQL hands JSON columns back as strings, so callers that want a mapping
+    have to decode them. Anything unparsable degrades to ``default`` rather than
+    raising, because a malformed metadata blob must not fail a science job.
+    """
+    if value is None:
+        return default
+    if isinstance(value, (dict, list)):
+        return value
+    if isinstance(value, (bytes, bytearray)):
+        value = value.decode("utf-8", errors="replace")
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            return default
+    return default
+
 def connect():
     return pymysql.connect(
         host=config.DB_HOST,

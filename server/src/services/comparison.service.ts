@@ -3,12 +3,19 @@ import { generateId } from "../utils/hash.js";
 import { getObservationById } from "./observation.service.js";
 import { createJob } from "./job.service.js";
 import { JOB_TYPES } from "../config/constants.js";
+import {
+  listMovingObjectMatches,
+  type MovingObjectMatch,
+} from "./moving-object.service.js";
+import { logger } from "../utils/logger.js";
 import type { ComparisonRow, ObservationRow, ChangeCandidateRow } from "../types/index.js";
 
 export interface ComparisonWithDetails extends ComparisonRow {
   observationA?: ObservationRow;
   observationB?: ObservationRow;
   candidates?: ChangeCandidateRow[];
+  /** NASA JPL identifications recorded for this comparison, newest pass only. */
+  movingObjects?: MovingObjectMatch[];
 }
 
 export async function getComparisonById(
@@ -27,11 +34,21 @@ export async function getComparisonById(
     [id]
   );
 
+  // A missing moving_object_matches table (migration not yet applied) must not
+  // break the comparison view, so the JPL block degrades to an empty list.
+  let movingObjects: MovingObjectMatch[] = [];
+  try {
+    movingObjects = await listMovingObjectMatches(id);
+  } catch (error) {
+    logger.warn(`Could not read JPL identifications for comparison ${id}:`, error);
+  }
+
   return {
     ...comp,
     observationA: obsA || undefined,
     observationB: obsB || undefined,
     candidates,
+    movingObjects,
   };
 }
 

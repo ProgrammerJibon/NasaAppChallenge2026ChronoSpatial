@@ -67,7 +67,11 @@ def test_pixel_inspection():
         inspect_pixel(plane, 999, 999)
 
 def test_real_fits_file_if_available():
-    fits_files = list(Path("storage/fits").glob("*.fits"))
+    # Resolve against the configured storage root rather than the working
+    # directory, so cutouts fetched from IRSA are actually exercised here.
+    from spherex import config
+
+    fits_files = sorted((config.STORAGE_PATH / "fits").glob("*.fits"))
     if not fits_files:
         pytest.skip("No local FITS files in storage/fits")
     sample = fits_files[0]
@@ -76,3 +80,6 @@ def test_real_fits_file_if_available():
     assert plane.wcs.has_celestial
     meta = get_plane_metadata(plane)
     assert meta["width"] > 0
+    assert meta["height"] > 0
+    assert 0 <= meta["ra"] < 360
+    assert -90 <= meta["dec"] <= 90

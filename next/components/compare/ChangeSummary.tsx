@@ -2,7 +2,8 @@
 
 import React from "react";
 import type { Comparison, ChangeCandidate } from "@/lib/types";
-import { RiAlertLine, RiSparklingLine, RiTimeLine, RiRadarLine } from "react-icons/ri";
+import { RiAlertLine, RiSparklingLine, RiTimeLine, RiRadarLine, RiPlanetLine } from "react-icons/ri";
+import { SolarSystemPanel } from "./SolarSystemPanel";
 
 export interface ChangeSummaryProps {
   comparison: Comparison;
@@ -98,11 +99,24 @@ export function ChangeSummary({ comparison, onSelectCandidate }: ChangeSummaryPr
                     {String(cand.metadata_json.possible_class)}
                   </p>
                 )}
+
+                {cand.metadata_json?.solar_system_identification && (
+                  <p className="flex items-start gap-1 text-[10px] text-violet-300 m-0">
+                    <RiPlanetLine className="w-3 h-3 flex-shrink-0 mt-0.5" aria-hidden />
+                    <span>
+                      NASA JPL: {cand.metadata_json.solar_system_identification.object_name}
+                      {" "}({cand.metadata_json.solar_system_identification.separation_arcsec.toFixed(1)}″)
+                    </span>
+                  </p>
+                )}
               </div>
             ))}
           </div>
         </div>
       )}
+
+      {/* NASA JPL solar-system identifications */}
+      <SolarSystemPanel comparison={comparison} />
 
       {/* Scientific Limitation Alert */}
       <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-950/20 border border-amber-800/40 text-xs text-amber-200/90 leading-relaxed">

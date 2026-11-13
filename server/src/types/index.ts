@@ -72,6 +72,26 @@ export interface ChangeCandidateRow {
   created_at: Date;
 }
 
+export interface MovingObjectMatchRow {
+  id: string;
+  comparison_id: string;
+  candidate_id: string | null;
+  object_name: string;
+  object_designation: string | null;
+  ra: number;
+  dec: number;
+  separation_arcsec: number;
+  offset_arcsec: number | null;
+  apparent_magnitude: number | null;
+  ra_rate_arcsec_per_hour: number | null;
+  dec_rate_arcsec_per_hour: number | null;
+  motion_arcsec_per_hour: number | null;
+  epoch_utc: Date | string;
+  source: string;
+  orbit_json: Record<string, unknown> | string | null;
+  created_at: Date;
+}
+
 export interface ReviewRow {
   id: string;
   comparison_id: string;
@@ -116,5 +136,27 @@ export interface BootstrapResponse {
     archive: string;
     collection: string;
     level: string;
+    discoveryService: string;
+    cutoutService: string;
+  };
+  integrations: {
+    irsa: {
+      archive: string;
+      service: string;
+      endpoint: string;
+      collections: readonly string[];
+      defaultCollection: string;
+      requiresApiKey: boolean;
+    };
+    jpl: {
+      horizons: string;
+      smallBodyDatabase: string;
+      smallBodyIdentification: string;
+      requiresApiKey: boolean;
+    };
+    nasaApi: {
+      service: string;
+      configured: boolean;
+    };
   };
 }

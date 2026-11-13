@@ -2,6 +2,8 @@ import type { Request, Response } from "express";
 import { query } from "../db/connection.js";
 import { sendSuccess } from "../utils/response.js";
 import { getWorkerStatus } from "../services/job.service.js";
+import { describeIntegrations } from "../services/integration-status.service.js";
+import { env } from "../config/env.js";
 import type { SkyRegionRow, ObservationRow, ComparisonRow, BootstrapResponse } from "../types/index.js";
 
 export async function getBootstrap(_req: Request, res: Response) {
@@ -41,9 +43,12 @@ export async function getBootstrap(_req: Request, res: Response) {
     dataSource: {
       label: "NASA/IPAC IRSA SPHEREx Survey",
       archive: "IRSA",
-      collection: "spherex_qr3",
+      collection: env.IRSA_COLLECTION,
       level: "Level-2 Calibrated Spectral Images",
+      discoveryService: "IVOA Simple Image Access v2 (ObsCore)",
+      cutoutService: "IRSA Image Bounded Extraction (IBE)",
     },
+    integrations: describeIntegrations(),
   };
 
   return sendSuccess(res, response);

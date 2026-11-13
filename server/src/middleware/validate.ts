@@ -1,11 +1,11 @@
 import type { Request, Response, NextFunction } from "express";
-import type { AnyZodObject } from "zod";
+import type { ZodTypeAny } from "zod";
 import { sendError } from "../utils/response.js";
 
 interface ValidationOptions {
-  body?: AnyZodObject;
-  query?: AnyZodObject;
-  params?: AnyZodObject;
+  body?: ZodTypeAny;
+  query?: ZodTypeAny;
+  params?: ZodTypeAny;
 }
 
 export function validate(options: ValidationOptions) {

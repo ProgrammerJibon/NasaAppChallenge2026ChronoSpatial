@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
 import { app } from "../src/app.js";
-import { closePool } from "../src/db/connection.js";
+import { closePool, query } from "../src/db/connection.js";
 
 describe("SPHEREx Sky Change Explorer API Endpoints", () => {
   afterAll(async () => {
@@ -112,17 +112,34 @@ describe("SPHEREx Sky Change Explorer API Endpoints", () => {
       expect(res.body.error.code).toBe("VALIDATION_ERROR");
     });
 
-    it("queues a job for unobserved coordinates", async () => {
+    it("serves cached observations, or queues an archive fetch when there are none", async () => {
+      // Which branch is correct depends on what has already been ingested from
+      // IRSA, so the test establishes that first rather than assuming an empty
+      // archive — any sky position can become populated once the worker runs.
+      const ra = 180.0;
+      const dec = 0.0;
+      const radiusDeg = 0.1;
+      const cosDec = Math.cos((dec * Math.PI) / 180);
+      const local = await query<{ count: number }>(
+        "SELECT COUNT(*) AS count FROM observations WHERE ABS(`dec` - ?) <= ? AND ABS((ra - ?) * ?) <= ?",
+        [dec, radiusDeg, ra, cosDec, radiusDeg]
+      );
+      const alreadyIngested = Number(local[0]?.count ?? 0) > 0;
+
       const res = await request(app)
         .post("/api/observations/search")
-        .send({
-          ra: 180.0,
-          dec: 0.0,
-          radiusDeg: 0.1,
-        });
+        .send({ ra, dec, radiusDeg });
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
+
+      if (alreadyIngested) {
+        expect(res.body.data.status).toBe("cached");
+        expect(Array.isArray(res.body.data.observations)).toBe(true);
+        expect(res.body.data.observations.length).toBeGreaterThan(0);
+        return;
+      }
+
       expect(res.body.data.status).toBe("queued");
       expect(res.body.data.jobId).toBeDefined();
 
@@ -130,6 +147,21 @@ describe("SPHEREx Sky Change Explorer API Endpoints", () => {
       const jobRes = await request(app).get(`/api/jobs/${res.body.data.jobId}`);
       expect(jobRes.status).toBe(200);
       expect(jobRes.body.data.status).toBe("queued");
+      expect(jobRes.body.data.type).toBe("FETCH_OBSERVATIONS");
+    });
+
+    it("queues an archive fetch for a position with no local coverage", async () => {
+      // A deliberately obscure position that no part of this project ingests.
+      const res = await request(app)
+        .post("/api/observations/search")
+        .send({ ra: 311.73, dec: -41.29, radiusDeg: 0.02 });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.status).toBe("queued");
+      expect(res.body.data.jobId).toBeDefined();
+
+      const jobRes = await request(app).get(`/api/jobs/${res.body.data.jobId}`);
+      expect(jobRes.body.data.type).toBe("FETCH_OBSERVATIONS");
     });
   });
 

@@ -10,6 +10,11 @@ import type {
   ObservationReview,
   ObservationReviewInput,
   ObservationReviewStats,
+  ArchiveSearchResult,
+  EphemerisResult,
+  IdentifyResult,
+  MovingObjectMatch,
+  NasaIntegrations,
 } from "./types";
 
 export class ApiError extends Error {
@@ -152,6 +157,90 @@ export const api = {
     }),
   getObservationReviewStats: (observationId: string) =>
     request<ObservationReviewStats>(`/observation-reviews/${encodeURIComponent(observationId)}/stats`),
+
+  // --- NASA/IPAC IRSA live archive ---
+  getArchiveCollections: () =>
+    request<{
+      collections: Array<{ name: string; default: boolean; release: string; kind: string }>;
+      defaultCollection: string;
+      archive: string;
+      service: string;
+      endpoint: string;
+      bandCount: number;
+      requiresApiKey: boolean;
+    }>("/archive/collections"),
+
+  /** Query NASA/IPAC IRSA's SIA2 service directly, without the local database. */
+  searchArchive: (params: {
+    ra: number;
+    dec: number;
+    radiusDeg?: number;
+    collection?: string;
+    band?: number | null;
+    limit?: number;
+  }) =>
+    request<ArchiveSearchResult>("/archive/search", {
+      method: "POST",
+      body: JSON.stringify(params),
+    }),
+
+  getArchiveCutoutUrl: (params: { accessUrl: string; ra: number; dec: number; sizeDeg?: number }) =>
+    request<{ cutoutUrl: string; centerRa: number; centerDec: number; sizeDeg: number; service: string }>(
+      "/archive/cutout-url",
+      { method: "POST", body: JSON.stringify(params) }
+    ),
+
+  // --- NASA JPL solar-system services ---
+  /** Known minor planets and comets inside a field at an instant. */
+  identifyMovingObjects: (params: {
+    ra: number;
+    dec: number;
+    halfWidthDeg?: number;
+    obsTime: string;
+    vmagLimit?: number;
+    twoPass?: boolean;
+  }) =>
+    request<IdentifyResult>("/solar-system/identify", {
+      method: "POST",
+      body: JSON.stringify(params),
+    }),
+
+  getEphemeris: (params: {
+    target: string;
+    epoch?: string;
+    start?: string;
+    stop?: string;
+    step?: string;
+    center?: string;
+  }) => {
+    const sp = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined && value !== null && value !== "") sp.set(key, String(value));
+    }
+    return request<EphemerisResult>(`/solar-system/ephemeris?${sp.toString()}`);
+  },
+
+  getSmallBody: (designation: string) =>
+    request<any>(`/solar-system/objects/${encodeURIComponent(designation)}`),
+
+  getNearEarthObject: (identifier: string) =>
+    request<any>(`/solar-system/neo/${encodeURIComponent(identifier)}`),
+
+  /** JPL identifications already recorded for a comparison. */
+  getMovingObjects: (comparisonId: string) =>
+    request<{ comparisonId: string; count: number; matches: MovingObjectMatch[]; source: string }>(
+      `/comparisons/${encodeURIComponent(comparisonId)}/moving-objects`
+    ),
+
+  /** Queue a fresh JPL identification pass for a completed comparison. */
+  requestIdentification: (comparisonId: string, options: { vmagLimit?: number; toleranceArcsec?: number } = {}) =>
+    request<{ comparisonId: string; jobId: string; status: "queued" | "already-queued" }>(
+      `/comparisons/${encodeURIComponent(comparisonId)}/identify`,
+      { method: "POST", body: JSON.stringify(options) }
+    ),
+
+  getIntegrations: () =>
+    request<{ status: string; integrations: NasaIntegrations }>("/health"),
 
   // File URL generators
   getPreviewUrl: (observationId: string) =>

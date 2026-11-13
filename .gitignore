@@ -39,6 +39,14 @@ storage/*.sqlite*
 storage/differences/comp-*.webp
 next/AGENTS.md
 
+# Archive products the science worker downloads from NASA/IPAC IRSA at runtime,
+# plus the previews it renders from them. These are reproducible from the
+# archive, so they must not be committed. Demo assets that are already tracked
+# stay tracked: .gitignore never applies to files git is already following.
+storage/fits/*.fits
+storage/fits/*.part
+storage/previews/*.webp
+
 # Operating System Files
 .DS_Store
 Thumbs.db

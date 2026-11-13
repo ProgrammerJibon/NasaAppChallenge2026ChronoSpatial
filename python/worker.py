@@ -10,7 +10,11 @@ from datetime import datetime
 
 from spherex import config
 from spherex.database import connect, execute, query_one, encode_json
-from spherex.jobs import handle_fetch_observations, handle_compare_epochs
+from spherex.jobs import (
+    handle_fetch_observations,
+    handle_compare_epochs,
+    handle_identify_objects,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -45,16 +49,20 @@ def claim_job(conn):
         job = cur.fetchone()
         if not job:
             return None
-            
+
+        # Re-check the status in the UPDATE so two workers can never run the
+        # same job: only the one whose UPDATE matches a still-queued row wins.
         cur.execute(
             """UPDATE processing_jobs
                SET status = 'processing',
                    attempts = attempts + 1,
                    started_at = UTC_TIMESTAMP(3),
                    heartbeat_at = UTC_TIMESTAMP(3)
-               WHERE id = %s""",
+               WHERE id = %s AND status = 'queued'""",
             (job["id"],),
         )
+        if cur.rowcount == 0:
+            return None
         return job
 
 def run_job(conn, job):
@@ -75,9 +83,11 @@ def run_job(conn, job):
 
     try:
         if job_type == "FETCH_OBSERVATIONS":
-            result = handle_fetch_observations(payload, update_progress)
+            result = handle_fetch_observations(payload, update_progress, conn)
         elif job_type == "COMPARE_EPOCHS":
             result = handle_compare_epochs(payload, update_progress, conn)
+        elif job_type == "IDENTIFY_OBJECTS":
+            result = handle_identify_objects(payload, update_progress, conn)
         else:
             raise ValueError(f"Unknown job type: {job_type}")
 

@@ -12,6 +12,9 @@ import { sha256, generateId, generateToken, hashToken } from "./utils/hash.js";
 import { sendError, sendSuccess } from "./utils/response.js";
 import { cleanCache, getStorageStatus } from "./controllers/admin.controller.js";
 import { checkArchiveAssets, checkPublicPages } from "./services/platform-monitor.service.js";
+import { describeIntegrations } from "./services/integration-status.service.js";
+import archiveRoutes from "./routes/archive.routes.js";
+import solarSystemRoutes from "./routes/solar-system.routes.js";
 
 /** Bundled IRSA images with a durable SQLite store for observation reviews when MySQL is unavailable. */
 export async function createDemoFallbackApp(options: { reviewDbPath?: string } = {}) {
@@ -63,12 +66,19 @@ export async function createDemoFallbackApp(options: { reviewDbPath?: string } =
   };
   const withComparisonDetails = (comparison: (typeof comparisons)[number]) => ({
     ...comparison,
+    movingObjects: [],
     observationA: observationById.get(comparison.observation_a_id) ?? null,
     observationB: observationById.get(comparison.observation_b_id) ?? null,
     candidates: candidates.filter(item => item.comparison_id === comparison.id),
   });
 
-  app.get("/api/health", (_req, res) => sendSuccess(res, { status: "demo", database: "offline", dataSource: "bundled IRSA observations" }));
+  app.get("/api/health", (_req, res) => sendSuccess(res, {
+    status: "demo", database: "offline", dataSource: "bundled IRSA observations",
+    integrations: describeIntegrations(),
+  }));
+  // Live NASA integrations need no database, so they stay available here.
+  app.use("/api/archive", archiveRoutes);
+  app.use("/api/solar-system", solarSystemRoutes);
   app.post("/api/admin/login", (req, res) => {
     const password = req.body?.password;
     if (typeof password !== "string" || !password) {
@@ -131,7 +141,13 @@ export async function createDemoFallbackApp(options: { reviewDbPath?: string } =
       demoComparisonId: comparisons[0]?.id ?? null,
       serverStatus: "healthy",
       workerStatus: "offline",
-      dataSource: { label: "NASA/IPAC IRSA SPHEREx Survey (local archive)", archive: "IRSA", collection: "spherex_qr3", level: "Level-2 Calibrated Spectral Images" },
+      dataSource: {
+        label: "NASA/IPAC IRSA SPHEREx Survey (local archive)", archive: "IRSA",
+        collection: env.IRSA_COLLECTION, level: "Level-2 Calibrated Spectral Images",
+        discoveryService: "IVOA Simple Image Access v2 (ObsCore)",
+        cutoutService: "IRSA Image Bounded Extraction (IBE)",
+      },
+      integrations: describeIntegrations(),
     });
   });
   app.get("/api/regions", (_req, res) => sendSuccess(res, regions));
@@ -170,6 +186,18 @@ export async function createDemoFallbackApp(options: { reviewDbPath?: string } =
     const comparison = comparisonById.get(req.params.id);
     return comparison ? sendSuccess(res, withComparisonDetails(comparison)) : sendError(res, "COMPARISON_NOT_FOUND", "Comparison not found", 404);
   });
+  app.get("/api/comparisons/:id/moving-objects", (req, res) => {
+    const comparison = comparisonById.get(req.params.id);
+    if (!comparison) return sendError(res, "COMPARISON_NOT_FOUND", "Comparison not found", 404);
+    // Stored identifications live in MySQL; the bundled archive carries none.
+    return sendSuccess(res, {
+      comparisonId: comparison.id, count: 0, matches: [],
+      source: "NASA/JPL Small-Body Identification + Small-Body Database",
+    });
+  });
+  app.post("/api/comparisons/:id/identify", (_req, res) => sendError(res, "DATABASE_OFFLINE",
+    "Queueing a JPL identification pass requires MySQL and the science worker. " +
+    "POST /api/solar-system/identify queries JPL directly without them.", 503));
   app.post("/api/comparisons", (req, res) => {
     const { observationAId, observationBId } = req.body ?? {};
     const comparison = comparisons.find(item =>
