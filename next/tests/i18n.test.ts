@@ -74,4 +74,14 @@ describe("i18n Multi-Language Support", () => {
     setLanguage("en");
     expect(t("home")).toBe("Home");
   });
+
+  it("translates the redesigned homepage copy in every offered language", () => {
+    const { setLanguage, t } = useLanguage.getState();
+    for (const language of expectedLanguages) {
+      setLanguage(language);
+      expect(t("homeTitleOne")).not.toBe("homeTitleOne");
+      expect(t("homeCompareOne")).not.toBe("homeCompareOne");
+    }
+    setLanguage("en");
+  });
 });

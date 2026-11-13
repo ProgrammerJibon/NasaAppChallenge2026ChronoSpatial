@@ -12,6 +12,15 @@ export function LanguageSelector() {
   const currentLang = LANGUAGES.find((l) => l.code === language) || LANGUAGES[0];
 
   useEffect(() => {
+    try {
+      const stored = localStorage.getItem("spherex_lang");
+      if (stored && LANGUAGES.some((item) => item.code === stored)) setLanguage(stored as Language);
+    } catch {
+      // The selector remains usable when storage is restricted.
+    }
+  }, [setLanguage]);
+
+  useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false);
@@ -34,6 +43,7 @@ export function LanguageSelector() {
         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-xs text-slate-200 hover:text-white transition cursor-pointer font-mono shadow-sm"
         title="Select Language / ভাষা পরিবর্তন / भाषा चुनें"
         aria-label="Language Selector"
+        aria-expanded={isOpen}
       >
         <RiTranslate2 className="w-3.5 h-3.5 text-sky-400 shrink-0" />
         <span className="text-xs">{currentLang.flag}</span>

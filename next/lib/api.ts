@@ -7,6 +7,9 @@ import type {
   ProcessingJob,
   ReviewItem,
   ReviewStats,
+  ObservationReview,
+  ObservationReviewInput,
+  ObservationReviewStats,
 } from "./types";
 
 export class ApiError extends Error {
@@ -119,8 +122,8 @@ export const api = {
 
   getComparison: (id: string) => request<Comparison>(`/comparisons/${id}`),
 
-  getNextReview: (visitorId?: string) =>
-    request<ReviewItem>("/review/next", {
+  getNextReview: (visitorId?: string, excludedIds: string[] = []) =>
+    request<ReviewItem>(`/review/next${excludedIds.length ? `?exclude=${encodeURIComponent(excludedIds.join(","))}` : ""}`, {
       headers: visitorId ? { "x-visitor-id": visitorId } : {},
     }),
 
@@ -138,6 +141,17 @@ export const api = {
 
   getReviewStats: (comparisonId: string) =>
     request<ReviewStats>(`/reviews/stats/${comparisonId}`),
+
+  saveObservationReview: (review: ObservationReviewInput, visitorId: string) =>
+    request<ObservationReview>("/observation-reviews", {
+      method: "POST", headers: { "x-visitor-id": visitorId }, body: JSON.stringify(review),
+    }),
+  getOwnObservationReview: (observationId: string, visitorId: string) =>
+    request<ObservationReview | null>(`/observation-reviews/${encodeURIComponent(observationId)}/mine`, {
+      headers: { "x-visitor-id": visitorId },
+    }),
+  getObservationReviewStats: (observationId: string) =>
+    request<ObservationReviewStats>(`/observation-reviews/${encodeURIComponent(observationId)}/stats`),
 
   // File URL generators
   getPreviewUrl: (observationId: string) =>
@@ -161,6 +175,11 @@ export const api = {
 
   adminGetStatus: (token: string) =>
     request<any>("/admin/status", {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  adminGetOverview: (token: string) =>
+    request<any>("/admin/overview", {
       headers: { Authorization: `Bearer ${token}` },
     }),
 

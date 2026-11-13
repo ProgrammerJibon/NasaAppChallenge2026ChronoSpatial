@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
+import { SpaceBackdrop } from "@/components/layout/SpaceBackdrop";
 import { Footer } from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
@@ -39,9 +40,11 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-screen flex flex-col bg-slate-950 text-slate-100 cosmic-bg grid-pattern antialiased transition-colors duration-200">
+      <body className="min-h-screen flex flex-col antialiased">
+        <a href="#main-content" className="skip-link">Skip to content</a>
+        <SpaceBackdrop />
         <Header />
-        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main id="main-content" className="app-main">
           {children}
         </main>
         <Footer />

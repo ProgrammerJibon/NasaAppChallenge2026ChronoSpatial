@@ -1,136 +1,29 @@
 "use client";
-
-import React, { useState } from "react";
-import type { Comparison, Observation, ChangeCandidate } from "@/lib/types";
+import type { Comparison, Observation } from "@/lib/types";
 import { SideBySide } from "./SideBySide";
 import { SwipeCompare } from "./SwipeCompare";
 import { BlinkCompare } from "./BlinkCompare";
+import { CrossfadeCompare } from "./CrossfadeCompare";
 import { DifferenceView } from "./DifferenceView";
-import { ChangeSummary } from "./ChangeSummary";
-import { COMPARISON_MODES, type ComparisonMode } from "@/lib/constants";
+import { ExampleMapView } from "./ExampleMapView";
 import { api } from "@/lib/api";
-import {
-  RiSplitCellsHorizontal,
-  RiDragMoveLine,
-  RiEye2Line,
-  RiContrast2Line,
-  RiSubtractLine,
-  RiRadarLine,
-} from "react-icons/ri";
-
-export interface CompareWorkspaceProps {
-  comparison: Comparison;
-  obsA: Observation;
-  obsB: Observation;
-}
-
-const modeIcons: Record<ComparisonMode, React.ReactNode> = {
-  "side-by-side": <RiSplitCellsHorizontal />,
-  swipe: <RiDragMoveLine />,
-  blink: <RiEye2Line />,
-  fade: <RiContrast2Line />,
-  difference: <RiSubtractLine />,
-  significance: <RiRadarLine />,
-};
-
-export function CompareWorkspace({
-  comparison,
-  obsA,
-  obsB,
-}: CompareWorkspaceProps) {
-  const [mode, setMode] = useState<ComparisonMode>("side-by-side");
-  const [selectedCandidate, setSelectedCandidate] = useState<ChangeCandidate | null>(null);
-
-  const alignedA = comparison.aligned_a_path
-    ? api.getComparisonFileUrl(comparison.id, "aligned-a")
-    : undefined;
-  const alignedB = comparison.aligned_b_path
-    ? api.getComparisonFileUrl(comparison.id, "aligned-b")
-    : undefined;
-
-  return (
-    <div className="flex flex-col gap-6">
-      {/* Mode Switcher Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-2 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-md">
-        <div className="flex flex-wrap items-center gap-1.5">
-          {COMPARISON_MODES.map((m) => {
-            const isActive = mode === m.id;
-            return (
-              <button
-                key={m.id}
-                type="button"
-                onClick={() => setMode(m.id)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer ${
-                  isActive
-                    ? "bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md shadow-sky-500/20"
-                    : "text-slate-400 hover:text-white hover:bg-slate-800"
-                }`}
-              >
-                <span>{modeIcons[m.id]}</span>
-                <span>{m.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="text-[11px] font-mono text-slate-400 px-2">
-          {comparison.summary_json?.target_name || "SPHEREx Comparison"}
-        </div>
-      </div>
-
-      {/* Main Workspace Stage */}
-      <div className="p-4 rounded-3xl bg-slate-950/40 border border-slate-800/80">
-        {mode === "side-by-side" && (
-          <SideBySide
-            obsA={obsA}
-            obsB={obsB}
-            alignedSrcA={alignedA}
-            alignedSrcB={alignedB}
-          />
-        )}
-
-        {mode === "swipe" && (
-          <SwipeCompare
-            obsA={obsA}
-            obsB={obsB}
-            alignedSrcA={alignedA}
-            alignedSrcB={alignedB}
-          />
-        )}
-
-        {mode === "blink" && (
-          <BlinkCompare
-            obsA={obsA}
-            obsB={obsB}
-            alignedSrcA={alignedA}
-            alignedSrcB={alignedB}
-          />
-        )}
-
-        {mode === "fade" && (
-          <div className="flex flex-col items-center">
-            <BlinkCompare
-              obsA={obsA}
-              obsB={obsB}
-              alignedSrcA={alignedA}
-              alignedSrcB={alignedB}
-            />
-          </div>
-        )}
-
-        {(mode === "difference" || mode === "significance") && (
-          <DifferenceView
-            comparisonId={comparison.id}
-            hasSignificance={Boolean(comparison.significance_path)}
-          />
-        )}
-      </div>
-
-      {/* Summary and Candidates breakdown */}
-      <ChangeSummary
-        comparison={comparison}
-        onSelectCandidate={(c) => setSelectedCandidate(c)}
-      />
-    </div>
-  );
+import { useState } from "react";
+export function CompareWorkspace({comparison,obsA,obsB}:{comparison?:Comparison|null;obsA:Observation;obsB:Observation}) {
+  const [mode,setMode]=useState('swipe');
+  const current=mode;
+  const mapMode=current==='difference' || current==='significance';
+  const hasSelectedMap=Boolean(comparison && (current==='difference' ? comparison.difference_path : comparison.significance_path));
+  const alignedA=comparison?.aligned_a_path ? api.getComparisonFileUrl(comparison.id,'aligned-a') : undefined;
+  const alignedB=comparison?.aligned_b_path ? api.getComparisonFileUrl(comparison.id,'aligned-b') : undefined;
+  const shared={obsA,obsB,alignedSrcA:alignedA,alignedSrcB:alignedB};
+  const modes=[['swipe','Slide'],['blink','Blink'],['fade','Blend'],['side-by-side','Side by side'],['difference','Change map'],['significance','Noise check']];
+  const hints:Record<string,string>={swipe:'Drag the divider to reveal the first or second image.',blink:'Press play to alternate between the two dates.',fade:'Move the slider to blend the two observations.','side-by-side':'Two dates, next to each other.',difference:'Red means brighter in the second image; blue means fainter.',significance:'A larger signal here means the change is stronger relative to estimated noise.'};
+  return <div className="space-y-4"><div className="compare-mode-bar" role="group" aria-label="Comparison view">{modes.map(([id,label])=>{const example=(id==='difference' && !comparison?.difference_path) || (id==='significance' && !comparison?.significance_path);return <button type="button" key={id} aria-pressed={current===id} title={example ? 'Open an illustrative example; the selected pair cannot produce a scientific map' : hints[id]} onClick={()=>setMode(id)}>{label}</button>;})}</div><div className={`compare-stage compare-stage-${current}`}>
+    {current==='side-by-side' && <SideBySide {...shared}/>}
+    {current==='swipe' && <SwipeCompare {...shared}/>}
+    {current==='blink' && <BlinkCompare {...shared}/>}
+    {current==='fade' && <CrossfadeCompare {...shared}/>}
+    {mapMode && hasSelectedMap && comparison && <DifferenceView key={current} comparisonId={comparison.id} initialMode={current === 'difference' ? 'difference' : 'significance'} hasSignificance={Boolean(comparison.significance_path)}/>}
+    {mapMode && !hasSelectedMap && <ExampleMapView kind={current === 'difference' ? 'difference' : 'significance'}/>}
+  </div></div>;
 }

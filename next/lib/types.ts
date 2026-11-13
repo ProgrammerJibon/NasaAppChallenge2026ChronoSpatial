@@ -128,3 +128,22 @@ export interface ReviewStats {
   classifications: Record<string, number>;
   averageConfidence: number;
 }
+
+export type ObservationReviewClassification = "clear" | "faint" | "artifact" | "uncertain";
+export type ObservationReviewFlag = "noise" | "saturation" | "edge" | "structured-background";
+export interface ObservationReviewInput {
+  observationId: string;
+  classification: ObservationReviewClassification;
+  confidence: number;
+  flags: ObservationReviewFlag[];
+  note: string;
+}
+export interface ObservationReview extends ObservationReviewInput {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+export interface ObservationReviewStats {
+  totalReviews: number;
+  classifications: Record<string, number>;
+}

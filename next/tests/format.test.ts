@@ -19,6 +19,18 @@ describe("Formatting Utilities", () => {
     expect(formatShortDate(null)).toBe("Unknown");
   });
 
+  it("reads timezone-free archive timestamps as UTC", () => {
+    const previousTimezone = process.env.TZ;
+    process.env.TZ = "Asia/Dhaka";
+    try {
+      expect(formatDate("2025-08-22T00:29:17.067")).toBe(formatDate("2025-08-22T00:29:17.067Z"));
+      expect(formatShortDate("2025-08-22T00:29:17.067")).toBe(formatShortDate("2025-08-22T00:29:17.067Z"));
+    } finally {
+      if (previousTimezone === undefined) delete process.env.TZ;
+      else process.env.TZ = previousTimezone;
+    }
+  });
+
   it("formats RA and Dec coordinates with sign and precision", () => {
     const positive = formatCoords(180.123456, 45.67891);
     expect(positive).toBe("RA 180.1235° / Dec +45.6789°");

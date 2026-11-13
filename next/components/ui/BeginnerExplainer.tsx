@@ -67,7 +67,7 @@ export function BeginnerExplainer({
   const displayItems = items && items.length > 0 ? items : standardConcepts;
 
   return (
-    <div className="rounded-2xl bg-gradient-to-r from-sky-950/40 via-indigo-950/30 to-purple-950/40 border border-sky-800/40 overflow-hidden shadow-lg transition-all duration-300">
+    <div className="workspace-panel !p-0 overflow-hidden">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -76,7 +76,7 @@ export function BeginnerExplainer({
       >
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl bg-sky-500/20 border border-sky-500/40 flex items-center justify-center text-sky-400 shrink-0 shadow-inner">
-            <RiLightbulbLine className="w-4 h-4 animate-pulse" />
+            <RiLightbulbLine className="w-4 h-4" />
           </div>
           <div>
             <span className="text-xs font-mono text-sky-400 uppercase tracking-widest font-bold block">

@@ -21,7 +21,7 @@ for idx, item in enumerate(fits_catalog):
     
     if '8821809967fb' in item['filename']:
         obs_id = 'obs-m31-epoch-a'
-    elif 'f95042933d89' in item['filename'] or '3b18163674e8' in item['filename']:
+    elif 'f95042933d89' in item['filename']:
         obs_id = 'obs-m31-epoch-b'
     elif '2e36a6a6998e' in item['filename']:
         obs_id = 'obs-orion-epoch-a'
@@ -67,6 +67,10 @@ if 'obs-m31-epoch-a' not in obs_ids:
     observations[0]['id'] = 'obs-m31-epoch-a'
 if 'obs-m31-epoch-b' not in obs_ids:
     observations[1]['id'] = 'obs-m31-epoch-b'
+
+obs_ids = [observation['id'] for observation in observations]
+if len(obs_ids) != len(set(obs_ids)):
+    raise ValueError('Demo observation IDs must be unique')
 
 comparisons = [
     {

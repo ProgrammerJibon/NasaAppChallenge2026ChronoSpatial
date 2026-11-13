@@ -18,7 +18,7 @@ export function SideBySide({ obsA, obsB, alignedSrcA, alignedSrcB }: SideBySideP
       {/* Epoch A */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between text-xs px-2 text-slate-300">
-          <span className="font-semibold text-sky-400">Epoch A (Earlier)</span>
+          <span className="font-semibold text-sky-400">First observation</span>
           <span className="font-mono text-slate-400">{formatDate(obsA.observation_date)}</span>
         </div>
         <div className="relative aspect-square rounded-2xl bg-black border border-slate-800 overflow-hidden shadow-xl">
@@ -37,7 +37,7 @@ export function SideBySide({ obsA, obsB, alignedSrcA, alignedSrcB }: SideBySideP
       {/* Epoch B */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between text-xs px-2 text-slate-300">
-          <span className="font-semibold text-purple-400">Epoch B (Later)</span>
+          <span className="font-semibold text-purple-400">Second observation</span>
           <span className="font-mono text-slate-400">{formatDate(obsB.observation_date)}</span>
         </div>
         <div className="relative aspect-square rounded-2xl bg-black border border-slate-800 overflow-hidden shadow-xl">

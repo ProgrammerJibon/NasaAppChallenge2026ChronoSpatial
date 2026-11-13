@@ -1,376 +1,179 @@
 "use client";
 
-import React, { useState, useEffect, Suspense, useMemo } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { api, ApiError } from "@/lib/api";
-import type { Comparison, Observation, SkyRegion } from "@/lib/types";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { RiFullscreenExitLine, RiFullscreenLine } from "react-icons/ri";
+import { FieldGallery } from "@/components/sky/FieldGallery";
+import { SkyImage } from "@/components/sky/SkyImage";
 import { CompareWorkspace } from "@/components/compare/CompareWorkspace";
+import { ChangeSummary } from "@/components/compare/ChangeSummary";
+import { ScienceDetails } from "@/components/mission/MissionWorkspace";
+import { MissionGuide } from "@/components/mission/MissionGuide";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { Button } from "@/components/ui/Button";
-import { BeginnerExplainer } from "@/components/ui/BeginnerExplainer";
-import { useLanguage } from "@/lib/i18n";
-import { formatShortDate, formatWavelength } from "@/lib/format";
-import {
-  RiContrast2Line,
-  RiExchangeLine,
-  RiSparklingLine,
-  RiCompass3Line,
-  RiTimeLine,
-  RiEyeLine,
-} from "react-icons/ri";
+import { api } from "@/lib/api";
+import { choosePreviewPair, compareReadiness } from "@/lib/compareReadiness";
+import { findEpochPair } from "@/lib/observationPairs";
+import { angularSeparationDeg } from "@/lib/skyGeometry";
+import { formatCoords, formatShortDate, formatWavelength } from "@/lib/format";
+import { shortFieldName } from "@/lib/skyFields";
+import type { ChangeCandidate, Comparison, Observation, SkyRegion } from "@/lib/types";
+
+function archiveSearchUrl(observation: Observation) {
+  return `https://irsa.ipac.caltech.edu/applications/spherex/?api=spectral-images&ra=${encodeURIComponent(observation.ra)}&dec=${encodeURIComponent(observation.dec)}&sr=15m&spatialRegionOperation=intersects`;
+}
+
+function SourceImage({ observation, label }: { observation: Observation; label: string }) {
+  return <div className="compare-source-card">
+    <div className="compare-source-top"><span>{label}</span><strong>{formatShortDate(observation.observation_date)}</strong></div>
+    <div className="compare-source-image"><SkyImage observationId={observation.id} alt={`SPHEREx source cutout ${label} from ${formatShortDate(observation.observation_date)}`} className="w-full h-full"/></div>
+    <div className="compare-source-data"><span>D{observation.band_number} · {formatWavelength(observation.wavelength_min_um, observation.wavelength_max_um)}</span><span>{observation.width} × {observation.height} measured pixels</span><span>{formatCoords(observation.ra, observation.dec)}</span></div>
+    <a href={archiveSearchUrl(observation)} target="_blank" rel="noreferrer">Find this sky position at IRSA ↗</a>
+  </div>;
+}
 
 function CompareContent() {
-  const { t } = useLanguage();
-  const searchParams = useSearchParams();
   const router = useRouter();
-
-  const [comparison, setComparison] = useState<Comparison | null>(null);
+  const params = useSearchParams();
+  const [regions, setRegions] = useState<SkyRegion[]>([]);
+  const [observations, setObservations] = useState<Observation[]>([]);
+  const [regionId, setRegionId] = useState<string | null>(null);
   const [obsA, setObsA] = useState<Observation | null>(null);
   const [obsB, setObsB] = useState<Observation | null>(null);
-  const [allObservations, setAllObservations] = useState<Observation[]>([]);
-  const [regions, setRegions] = useState<SkyRegion[]>([]);
-  const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null);
-
+  const [comparison, setComparison] = useState<Comparison | null>(null);
   const [loading, setLoading] = useState(true);
-  const [jobProgress, setJobProgress] = useState<number | null>(null);
+  const [progress, setProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  // Group observations by region
-  const regionObservations = useMemo(() => {
-    if (!selectedRegionId) return allObservations;
-    const filtered = allObservations.filter((o) => o.region_id === selectedRegionId);
-    return filtered.length > 0 ? filtered : allObservations;
-  }, [allObservations, selectedRegionId]);
+  const [candidate, setCandidate] = useState<ChangeCandidate | null>(null);
+  const [revision, setRevision] = useState(0);
+  const [mobilePanel, setMobilePanel] = useState<"select" | "view" | "verify">("view");
+  const viewerRef = useRef<HTMLElement>(null);
+  const [viewerFullscreen, setViewerFullscreen] = useState(false);
 
   useEffect(() => {
-    async function init() {
+    const syncFullscreen = () => setViewerFullscreen(document.fullscreenElement === viewerRef.current);
+    document.addEventListener("fullscreenchange", syncFullscreen);
+    return () => document.removeEventListener("fullscreenchange", syncFullscreen);
+  }, []);
+
+  const toggleViewerFullscreen = async () => {
+    try {
+      if (document.fullscreenElement === viewerRef.current) await document.exitFullscreen();
+      else await viewerRef.current?.requestFullscreen();
+    } catch {
+      // Browsers can deny fullscreen outside a trusted user gesture.
+    }
+  };
+
+  useEffect(() => {
+    let active = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let releaseDelay: (() => void) | undefined;
+    async function load() {
+      setLoading(true); setError(null); setProgress(null); setComparison(null);
       try {
-        setLoading(true);
-        setError(null);
-
-        const compIdParam = searchParams.get("id");
-        const obsAParam = searchParams.get("a");
-        const obsBParam = searchParams.get("b");
-
-        // Load regions and all available observations
-        const [regList, obsListRes] = await Promise.all([
-          api.getRegions(),
-          api.listObservations({ limit: 100 }),
-        ]);
-        setRegions(regList);
-        setAllObservations(obsListRes.observations);
-
-        // Case 1: Specific comparison ID provided
-        if (compIdParam) {
-          const comp = await api.getComparison(compIdParam);
-          setComparison(comp);
-          if (comp.observationA) {
-            setObsA(comp.observationA);
-            if (comp.observationA.region_id) {
-              setSelectedRegionId(comp.observationA.region_id);
-            }
-          }
-          if (comp.observationB) setObsB(comp.observationB);
-          setLoading(false);
+        const [regionList, archive] = await Promise.all([api.getRegions(), api.listObservations({ limit: 100 })]);
+        if (!active) return;
+        const items = archive.observations;
+        setRegions(regionList); setObservations(items);
+        const savedId = params.get("id");
+        if (savedId) {
+          const saved = await api.getComparison(savedId);
+          if (!active) return;
+          setObsA(saved.observationA ?? null); setObsB(saved.observationB ?? null);
+          setRegionId(saved.observationA?.region_id ?? null);
+          setComparison(saved);
           return;
         }
-
-        // Case 2: Specific pair A & B provided
-        if (obsAParam && obsBParam) {
-          const aObs = obsListRes.observations.find((o) => o.id === obsAParam);
-          const bObs = obsListRes.observations.find((o) => o.id === obsBParam);
-          if (aObs?.region_id) setSelectedRegionId(aObs.region_id);
-
-          const res = await api.createComparison(obsAParam, obsBParam);
-          if (res.status === "completed" && res.comparison) {
-            setComparison(res.comparison);
-            if (res.comparison.observationA) setObsA(res.comparison.observationA);
-            if (res.comparison.observationB) setObsB(res.comparison.observationB);
-            setLoading(false);
-            return;
-          } else if (res.jobId) {
-            pollComparisonJob(res.jobId, res.comparisonId || "");
+        const requestedRegion = regionList.find(region => region.slug === params.get("region"))
+          ?? regionList.find(region => region.slug === "m31") ?? regionList[0];
+        const requestedA = items.find(item => item.id === params.get("a"));
+        const requestedB = items.find(item => item.id === params.get("b"));
+        const inRegion = items.filter(item => item.region_id === requestedRegion?.id);
+        const selected = requestedA && requestedB ? [requestedA, requestedB] as [Observation, Observation]
+          : requestedA ? findEpochPair(items, requestedA) ?? choosePreviewPair(items.filter(item => item.region_id === requestedA.region_id))
+          : findEpochPair(inRegion) ?? choosePreviewPair(inRegion);
+        setObsA(selected?.[0] ?? null); setObsB(selected?.[1] ?? null);
+        setRegionId(selected?.[0].region_id ?? requestedRegion?.id ?? null);
+        if (!selected || !compareReadiness(selected[0], selected[1]).ready) return;
+        const result = await api.createComparison(selected[0].id, selected[1].id);
+        if (!active) return;
+        if (result.status === "completed" && result.comparison) { setComparison(result.comparison); return; }
+        if (!result.jobId || !result.comparisonId) throw new Error("The alignment job did not return a result.");
+        for (let attempt = 0; attempt < 90 && active; attempt++) {
+          const job = await api.getJob(result.jobId);
+          if (!active) return;
+          setProgress(job.progress);
+          if (job.status === "completed") {
+            const completed = await api.getComparison(result.comparisonId);
+            if (active) setComparison(completed);
             return;
           }
+          if (job.status === "failed" || job.status === "cancelled") throw new Error(job.error || "Alignment stopped.");
+          await new Promise<void>(resolve => { releaseDelay = resolve; timer = setTimeout(resolve, 2000); });
         }
-
-        // Case 3: Default bootstrap comparison
-        const bs = await api.getBootstrap();
-        if (bs.demoComparisonId) {
-          const comp = await api.getComparison(bs.demoComparisonId);
-          setComparison(comp);
-          if (comp.observationA) {
-            setObsA(comp.observationA);
-            if (comp.observationA.region_id) setSelectedRegionId(comp.observationA.region_id);
-          }
-          if (comp.observationB) setObsB(comp.observationB);
-          router.replace(`/compare?id=${bs.demoComparisonId}`);
-        } else if (obsListRes.observations.length >= 2) {
-          const a = obsListRes.observations[0];
-          const b = obsListRes.observations[1];
-          setObsA(a);
-          setObsB(b);
-          if (a.region_id) setSelectedRegionId(a.region_id);
-          const res = await api.createComparison(a.id, b.id);
-          if (res.status === "completed" && res.comparison) {
-            setComparison(res.comparison);
-          } else if (res.jobId) {
-            pollComparisonJob(res.jobId, res.comparisonId || "");
-            return;
-          }
-        }
-      } catch (err: any) {
-        setError(err instanceof ApiError ? err.message : err.message || "Failed to load epoch comparison workspace.");
+        if (active) throw new Error("Alignment is taking longer than expected. Try again shortly.");
+      } catch (cause) {
+        if (active) setError(cause instanceof Error ? cause.message : "The comparison could not load.");
       } finally {
-        setLoading(false);
+        if (active) { setLoading(false); setProgress(null); }
       }
     }
+    load();
+    return () => { active = false; if (timer) clearTimeout(timer); releaseDelay?.(); };
+  }, [params, revision]);
 
-    async function pollComparisonJob(jobId: string, comparisonId: string) {
-      let attempts = 0;
-      const interval = setInterval(async () => {
-        attempts++;
-        try {
-          const job = await api.getJob(jobId);
-          setJobProgress(job.progress);
-          if (job.status === "completed") {
-            clearInterval(interval);
-            const comp = await api.getComparison(comparisonId);
-            setComparison(comp);
-            if (comp.observationA) setObsA(comp.observationA);
-            if (comp.observationB) setObsB(comp.observationB);
-            setLoading(false);
-            setJobProgress(null);
-          } else if (job.status === "failed") {
-            clearInterval(interval);
-            setError(job.error || "Science worker was unable to align or compare these epochs.");
-            setLoading(false);
-            setJobProgress(null);
-          }
-        } catch {
-          if (attempts > 60) {
-            clearInterval(interval);
-            setError("Comparison processing timed out.");
-            setLoading(false);
-            setJobProgress(null);
-          }
-        }
-      }, 2000);
-    }
+  const region = regions.find(item => item.id === regionId);
+  const fieldObservations = observations.filter(item => item.region_id === regionId);
+  const assessment = obsA && obsB ? compareReadiness(obsA, obsB) : null;
+  const baseline = obsA && obsB ? Math.abs(Date.parse(obsB.observation_date) - Date.parse(obsA.observation_date)) / 86400000 : null;
+  const separation = obsA && obsB ? angularSeparationDeg(obsA.ra, obsA.dec, obsB.ra, obsB.dec) : null;
+  const footprintA = obsA?.metadata_json?.wcs ? Math.hypot(Math.abs(obsA.metadata_json.wcs.cdelt1) * obsA.width * Math.cos(obsA.dec * Math.PI / 180), Math.abs(obsA.metadata_json.wcs.cdelt2) * obsA.height) : null;
+  const footprintB = obsB?.metadata_json?.wcs ? Math.hypot(Math.abs(obsB.metadata_json.wcs.cdelt1) * obsB.width * Math.cos(obsB.dec * Math.PI / 180), Math.abs(obsB.metadata_json.wcs.cdelt2) * obsB.height) : null;
+  const fieldName = region ? shortFieldName(region) : "the selected field";
+  const goToPair = (a: Observation, b: Observation) => router.push(`/compare?a=${encodeURIComponent(a.id)}&b=${encodeURIComponent(b.id)}`);
 
-    init();
-  }, [searchParams, router]);
+  return <div className="mission-shell compare-shell"><div className="compare-page">
+    <header className="compare-workspace-header">
+      <div><span className="compare-kicker">CHRONO &amp; SPATIAL / OBSERVATION WORKSPACE</span><h1>Compare Epochs</h1><p>Choose a field and two dates. Inspect the images, then check whether a change map is scientifically valid.</p></div>
+      <div className="compare-workspace-blackhole" aria-hidden="true"><video muted loop autoPlay playsInline preload="metadata" src="/videos/black-hole-stationary-hd.mp4"/></div>
+      <a href="https://svs.gsfc.nasa.gov/13326" target="_blank" rel="noreferrer" className="compare-workspace-credit">NASA black hole simulation ↗</a>
+    </header>
+    <nav className="compare-workspace-mobile-nav" aria-label="Workspace panels"><button type="button" aria-pressed={mobilePanel === "select"} onClick={() => setMobilePanel("select")}>Select</button><button type="button" aria-pressed={mobilePanel === "view"} onClick={() => setMobilePanel("view")}>Viewer</button><button type="button" aria-pressed={mobilePanel === "verify"} onClick={() => setMobilePanel("verify")}>Evidence</button></nav>
+    <div className="compare-workspace-grid">
+      <aside className="compare-workspace-panel compare-workspace-controls" data-active={mobilePanel === "select"} aria-label="Field and date controls">
+        <div className="compare-workspace-panel-title"><span>01 / SELECT</span><h2>Sky field</h2><small>{fieldObservations.length} archive cutouts</small></div>
+        <FieldGallery regions={regions} observations={observations} selectedId={regionId ?? undefined} onSelect={selected => router.push(`/compare?region=${encodeURIComponent(selected.slug)}`)}/>
+        <div className="compare-workspace-pair-heading"><span>02 / DATES</span><h2>Observation pair</h2></div>
+        <div className="compare-pair-controls"><label>First observation<select aria-label="Epoch A observation" value={obsA?.id ?? ""} disabled={loading || !fieldObservations.length} onChange={event => { const next = fieldObservations.find(item => item.id === event.target.value); if (next && obsB) goToPair(next, obsB); }}>{fieldObservations.map(item => <option key={item.id} value={item.id}>{formatShortDate(item.observation_date)} · D{item.band_number}</option>)}</select></label><label>Second observation<select aria-label="Epoch B observation" value={obsB?.id ?? ""} disabled={loading || !fieldObservations.length} onChange={event => { const next = fieldObservations.find(item => item.id === event.target.value); if (obsA && next) goToPair(obsA, next); }}>{fieldObservations.map(item => <option key={item.id} value={item.id}>{formatShortDate(item.observation_date)} · D{item.band_number}</option>)}</select></label><button type="button" className="compare-swap" disabled={!obsA || !obsB || loading} onClick={() => { if (obsA && obsB) goToPair(obsB, obsA); }}>Swap dates ↔</button></div>
+        {error && <ErrorState title="The archive or alignment could not load" message={error} onRetry={() => setRevision(value => value + 1)}/>}
+      </aside>
 
-  const handleSelectRegion = (regionId: string) => {
-    setSelectedRegionId(regionId);
-    const obsInRegion = allObservations.filter((o) => o.region_id === regionId);
-    if (obsInRegion.length >= 2) {
-      router.push(`/compare?a=${obsInRegion[0].id}&b=${obsInRegion[1].id}`);
-    } else if (obsInRegion.length === 1) {
-      router.push(`/explore?region=${regions.find((r) => r.id === regionId)?.slug || "m31"}`);
-    }
-  };
+      <section ref={viewerRef} className="compare-workspace-panel compare-workspace-viewer compare-results-section" data-active={mobilePanel === "view"} aria-label="Observation viewer">
+        <button type="button" className="compare-viewer-fullscreen" aria-label={viewerFullscreen ? "Exit fullscreen viewer" : "Fullscreen viewer"} title={viewerFullscreen ? "Exit fullscreen" : "View fullscreen"} onClick={toggleViewerFullscreen}>{viewerFullscreen ? <RiFullscreenExitLine aria-hidden="true"/> : <RiFullscreenLine aria-hidden="true"/>}</button>
+        {loading ? <div className="compare-loading" role="status">{progress === null ? "Loading archive observations…" : `Aligning images… ${Math.round(progress)}%`}</div> : obsA && obsB ? <CompareWorkspace comparison={assessment?.ready ? comparison : null} obsA={obsA} obsB={obsB}/> : <div className="mission-empty">Choose a field with at least two observations.</div>}
+      </section>
 
-  const handleSwapEpochs = () => {
-    if (!obsA || !obsB) return;
-    router.push(`/compare?a=${obsB.id}&b=${obsA.id}`);
-  };
-
-  const handleChangeEpochA = (id: string) => {
-    if (!obsB) return;
-    router.push(`/compare?a=${id}&b=${obsB.id}`);
-  };
-
-  const handleChangeEpochB = (id: string) => {
-    if (!obsA) return;
-    router.push(`/compare?a=${obsA.id}&b=${id}`);
-  };
-
-  if (error) {
-    return (
-      <div className="space-y-6">
-        <ErrorState
-          title="Comparison Pair Incompatible or Failed"
-          message={error}
-          onRetry={() => window.location.reload()}
-          secondaryAction={
-            <div className="flex flex-wrap items-center gap-2 mt-2">
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => router.push("/compare")}
-              >
-                Load Default Andromeda M31 Pair
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const orionObs = allObservations.filter((o) => o.region_id === "region-orion");
-                  if (orionObs.length >= 2) {
-                    router.push(`/compare?a=${orionObs[0].id}&b=${orionObs[1].id}`);
-                  } else {
-                    router.push("/explore?region=orion");
-                  }
-                }}
-              >
-                Try Orion Nebula Pair
-              </Button>
-            </div>
-          }
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-6">
-      {/* Top Header & Epoch Selection Bar */}
-      <div className="flex flex-col gap-4 p-5 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-md">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <RiContrast2Line className="text-purple-400 w-5 h-5" />
-              <h1 className="text-xl font-bold text-white tracking-tight">
-                {t("compareHeading")}
-              </h1>
-            </div>
-            <p className="text-xs text-slate-400">
-              {t("compareSub")}
-            </p>
-          </div>
-
-          {/* Pair selectors */}
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Epoch A select */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs">
-              <span className="text-sky-400 font-bold">{t("epochALabel")}</span>
-              <select
-                value={obsA?.id || ""}
-                onChange={(e) => handleChangeEpochA(e.target.value)}
-                className="bg-transparent text-slate-200 text-xs focus:outline-none cursor-pointer max-w-[200px] truncate"
-              >
-                {regionObservations.map((o) => (
-                  <option key={o.id} value={o.id} className="bg-slate-900 text-slate-200">
-                    {formatShortDate(o.observation_date)} · Band {o.band_number}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleSwapEpochs}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer"
-              title={t("swapEpochs")}
-            >
-              <RiExchangeLine className="w-4 h-4" />
-            </button>
-
-            {/* Epoch B select */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs">
-              <span className="text-purple-400 font-bold">{t("epochBLabel")}</span>
-              <select
-                value={obsB?.id || ""}
-                onChange={(e) => handleChangeEpochB(e.target.value)}
-                className="bg-transparent text-slate-200 text-xs focus:outline-none cursor-pointer max-w-[200px] truncate"
-              >
-                {regionObservations.map((o) => (
-                  <option key={o.id} value={o.id} className="bg-slate-900 text-slate-200">
-                    {formatShortDate(o.observation_date)} · Band {o.band_number}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Region Target Pills */}
-        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/80">
-          <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider flex items-center gap-1">
-            <RiCompass3Line className="w-3.5 h-3.5 text-cyan-400" />
-            <span>{t("targetRegionLabel")}</span>
-          </span>
-          {regions.map((reg) => {
-            const isSelected = selectedRegionId === reg.id;
-            return (
-              <button
-                key={reg.id}
-                onClick={() => handleSelectRegion(reg.id)}
-                className={`px-3 py-1 rounded-xl text-xs font-mono transition-all ${
-                  isSelected
-                    ? "bg-purple-600/90 text-white font-bold border border-purple-500 shadow-md shadow-purple-950/40"
-                    : "bg-slate-950/60 hover:bg-slate-800 text-slate-300 border border-slate-800"
-                }`}
-              >
-                {reg.name}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Beginner Guide Explainer */}
-      <BeginnerExplainer
-        pageTitle={t("compareHeading")}
-        pagePurpose={t("compareSub")}
-        items={[
-          {
-            icon: <RiContrast2Line className="w-4 h-4 text-sky-400" />,
-            term: t("modeSideBySide"),
-            definition: t("swipeDesc"),
-          },
-          {
-            icon: <RiContrast2Line className="w-4 h-4 text-cyan-400" />,
-            term: t("modeSwipe"),
-            definition: t("swipeDesc"),
-          },
-          {
-            icon: <RiTimeLine className="w-4 h-4 text-amber-400" />,
-            term: t("modeBlink"),
-            definition: t("blinkDesc"),
-          },
-          {
-            icon: <RiSparklingLine className="w-4 h-4 text-purple-400" />,
-            term: t("modeDifference"),
-            definition: t("differenceDesc"),
-          },
-        ]}
-      />
-
-      {/* Main Workspace Stage */}
-      {loading ? (
-        <div className="flex flex-col items-center justify-center p-16 rounded-3xl bg-slate-950/60 border border-slate-800">
-          <div className="w-12 h-12 rounded-full border-4 border-purple-500 border-t-transparent animate-spin mb-4" />
-          <h3 className="text-base font-semibold text-white mb-1">
-            {jobProgress !== null
-              ? `Processing Scientific Difference (${jobProgress.toFixed(0)}%)...`
-              : t("aligningAndLoading")}
-          </h3>
-          <p className="text-xs text-slate-400 max-w-sm text-center">
-            {t("reprojectionNote")}
-          </p>
-        </div>
-      ) : comparison && obsA && obsB ? (
-        <CompareWorkspace
-          comparison={comparison}
-          obsA={obsA}
-          obsB={obsB}
-        />
-      ) : (
-        <div className="p-12 text-center text-slate-400 bg-slate-900/40 rounded-3xl border border-slate-800">
-          Please select two epochs from the same target region to compare.
-        </div>
-      )}
+      <aside className="compare-workspace-panel compare-workspace-inspector" data-active={mobilePanel === "verify"} aria-label="Evidence and source data">
+        <div className="compare-workspace-panel-title"><span>04 / VERIFY</span><h2>Pair evidence</h2><small>{fieldName}</small></div>
+        {obsA && obsB && assessment && <>
+          <div className="compare-pair-summary"><div><span>FIRST</span><strong>{formatShortDate(obsA.observation_date)}</strong></div><div className="compare-pair-baseline"><span>APART</span><strong>{baseline === null ? "—" : `${Math.round(baseline)}d`}</strong></div><div><span>SECOND</span><strong>{formatShortDate(obsB.observation_date)}</strong></div></div>
+          <div className={`compare-readiness ${assessment.ready ? "is-ready" : ""}`}><div><span className="compare-small-label">PAIR SCREEN</span><strong>{assessment.ready ? comparison ? "Ready to investigate" : "Alignment pending" : "Source views only"}</strong><p>{assessment.ready ? "Check noise and artifacts before interpreting a signal." : "A change map needs matching dates, wavelength and sky position."}</p></div><ul><li data-pass={assessment.checks.differentDate}>Different dates</li><li data-pass={assessment.checks.sameBand}>Same band</li><li data-pass={assessment.checks.similarWavelength}>Similar wavelength</li><li data-pass={assessment.checks.overlappingSky}>Overlapping sky</li></ul></div>
+          {separation !== null && footprintA !== null && footprintB !== null && <div className="compare-sky-distance"><span>SKY GEOMETRY</span><p>Centers: <strong>{separation.toFixed(2)}° apart</strong>. Image diagonals: <strong>{footprintA.toFixed(2)}°</strong> and <strong>{footprintB.toFixed(2)}°</strong>.</p></div>}
+          <div className="compare-source-grid"><SourceImage observation={obsA} label="SOURCE A"/><SourceImage observation={obsB} label="SOURCE B"/></div>
+          {comparison && <ScienceDetails title="Comparison measurements"><ChangeSummary comparison={comparison} onSelectCandidate={setCandidate}/>{candidate && <div className="inline-notice" role="status">Selected candidate: {candidate.id}. Coordinates: {candidate.ra.toFixed(4)}°, {candidate.dec.toFixed(4)}°. Score: {candidate.score.toFixed(1)}%. {candidate.metadata_json?.note}</div>}</ScienceDetails>}
+        </>}
+        <ScienceDetails title="Method and interpretation"><p>Two dates alone do not prove change. Their sky footprints and wavelengths must match; aligned images then need noise and artifact checks.</p><p>The local archive is a small sample of real SPHEREx cutouts. When no repeat overlaps, the viewer shows source imagery without generating a change map.</p><a href="https://irsa.ipac.caltech.edu/Missions/spherex.html" target="_blank" rel="noreferrer">NASA/IPAC IRSA SPHEREx data ↗</a></ScienceDetails>
+        <details className="guide-drawer"><summary><span>✦ Mission guide</span><span>Help +</span></summary><MissionGuide welcome="Choose two dated SPHEREx cutouts. I will explain the band, wavelength and sky-footprint checks." context={obsA && obsB ? `${fieldName} · D${obsA.band_number} / D${obsB.band_number}` : undefined} topics={[
+          { label: "Why these checks?", keywords: ["check", "eligible", "match"], answer: "Two dates alone are not enough. The footprints must overlap and the wavelengths must be similar so a different location or color of light is not mistaken for change." },
+          { label: "What is a change map?", keywords: ["map", "difference", "red", "blue"], answer: "After registration and background checks, a difference map shows where the second image is brighter or fainter. It is a lead, not a confirmed discovery." },
+          { label: "Can I inspect originals?", keywords: ["original", "source", "archive"], answer: "The source cards link to their NASA/IPAC IRSA sky positions, even when no scientific comparison is possible." },
+        ]}/></details>
+      </aside>
     </div>
-  );
+  </div></div>;
 }
 
 export default function ComparePage() {
-  return (
-    <Suspense fallback={<Skeleton className="w-full h-96 rounded-3xl" />}>
-      <CompareContent />
-    </Suspense>
-  );
+  return <Suspense fallback={<Skeleton className="h-96 rounded-2xl"/>}><CompareContent/></Suspense>;
 }

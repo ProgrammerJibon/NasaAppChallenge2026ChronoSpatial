@@ -38,6 +38,7 @@ export function CoordinateSearch({ onSearch, loading = false }: CoordinateSearch
         <RiSearchLine className="absolute left-3.5 text-slate-400 w-4 h-4 pointer-events-none" />
         <input
           type="text"
+          aria-label={t("searchPlaceholder")}
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);

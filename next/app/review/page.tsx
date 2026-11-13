@@ -1,208 +1,113 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { api, ApiError } from "@/lib/api";
-import type { ReviewItem, ReviewStats } from "@/lib/types";
-import { ReviewCard } from "@/components/review/ReviewCard";
-import { ReviewActions } from "@/components/review/ReviewActions";
-import { ErrorState } from "@/components/ui/ErrorState";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { RiArrowRightUpLine, RiCheckLine } from "react-icons/ri";
+import { CosmicWebScene } from "@/components/review/CosmicWebScene";
+import { SkyImage } from "@/components/sky/SkyImage";
+import { SkyImageViewer } from "@/components/sky/SkyImageViewer";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { BeginnerExplainer } from "@/components/ui/BeginnerExplainer";
-import { useLanguage } from "@/lib/i18n";
-import {
-  RiEyeLine,
-  RiCommunityLine,
-  RiShieldCheckLine,
-  RiSparklingLine,
-  RiCompass3Line,
-  RiContrast2Line,
-  RiAlertLine,
-} from "react-icons/ri";
+import { api } from "@/lib/api";
+import type { Observation, ObservationReview, ObservationReviewClassification, ObservationReviewFlag, ObservationReviewStats, SkyRegion } from "@/lib/types";
+
+const classifications: Array<{value: ObservationReviewClassification; title: string; detail: string}> = [
+  { value: "clear", title: "Clear source", detail: "A source is distinct from the background" },
+  { value: "faint", title: "Faint source", detail: "A possible source needs a closer look" },
+  { value: "artifact", title: "Possible artifact", detail: "The feature may come from imaging effects" },
+  { value: "uncertain", title: "Not sure", detail: "There is not enough visual evidence" },
+];
+const flagOptions: Array<{value: ObservationReviewFlag; label: string}> = [
+  { value: "noise", label: "Strong noise" }, { value: "saturation", label: "Saturation" },
+  { value: "edge", label: "Near image edge" }, { value: "structured-background", label: "Structured background" },
+];
+
+function visitorId() {
+  try {
+    let id = localStorage.getItem("spx_visitor_id");
+    if (!id) { id = `v_${crypto.randomUUID()}`; localStorage.setItem("spx_visitor_id", id); }
+    return id;
+  } catch { return `v_${crypto.randomUUID()}`; }
+}
+function dateLabel(value: string) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" });
+}
 
 export default function ReviewPage() {
-  const { t } = useLanguage();
-  const [item, setItem] = useState<ReviewItem | null>(null);
-  const [stats, setStats] = useState<ReviewStats | null>(null);
+  const [observations, setObservations] = useState<Observation[]>([]);
+  const [regions, setRegions] = useState<SkyRegion[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [fieldFilter, setFieldFilter] = useState("all");
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState<ObservationReview | null>(null);
+  const [stats, setStats] = useState<ObservationReviewStats | null>(null);
+  const [classification, setClassification] = useState<ObservationReviewClassification | null>(null);
+  const [confidence, setConfidence] = useState(.7);
+  const [flags, setFlags] = useState<ObservationReviewFlag[]>([]);
+  const [note, setNote] = useState("");
+  const visitor = useRef("");
+  const requestId = useRef(0);
 
-  // Get or create anonymous visitor token
-  const getVisitorId = () => {
-    if (typeof window === "undefined") return "anonymous";
-    let vid = localStorage.getItem("spx_visitor_id");
-    if (!vid) {
-      vid = "v_" + Math.random().toString(36).substring(2) + Date.now().toString(36);
-      localStorage.setItem("spx_visitor_id", vid);
-    }
-    return vid;
-  };
-
-  const loadNextItem = async () => {
+  const loadArchive = useCallback(async () => {
+    setLoading(true); setLoadError(null);
     try {
-      setLoading(true);
-      setError(null);
-      const visitorId = getVisitorId();
-      const nextItem = await api.getNextReview(visitorId);
-      setItem(nextItem);
-
-      if (nextItem.comparisonId) {
-        const reviewStats = await api.getReviewStats(nextItem.comparisonId);
-        setStats(reviewStats);
-      }
-    } catch (err: any) {
-      setError(err instanceof ApiError ? err.message : "Failed to load review candidate.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadNextItem();
+      const [observationResult, regionResult] = await Promise.all([api.listObservations({limit:100}), api.getRegions()]);
+      const available = observationResult.observations.filter(observation => Boolean(observation.preview_path));
+      setObservations(available); setRegions(regionResult);
+      setSelectedId(previous => previous && available.some(item => item.id === previous) ? previous : available[0]?.id ?? null);
+    } catch { setLoadError("The observation archive could not load. Please try again."); }
+    finally { setLoading(false); }
   }, []);
 
-  const handleSubmitReview = async (classification: string, confidence: number) => {
-    if (!item) return;
-    setSubmitting(true);
-    try {
-      const visitorId = getVisitorId();
-      await api.submitReview({
-        comparisonId: item.comparisonId,
-        candidateId: item.candidateId,
-        visitorHash: visitorId,
-        classification,
-        confidence,
-      });
+  useEffect(() => { visitor.current = visitorId(); void loadArchive(); }, [loadArchive]);
+  useEffect(() => {
+    if (!selectedId || !visitor.current) return;
+    const current = ++requestId.current;
+    setReviewLoading(true); setReviewError(null); setSaved(null);
+    setClassification(null); setConfidence(.7); setFlags([]); setNote(""); setStats(null);
+    Promise.all([api.getOwnObservationReview(selectedId, visitor.current), api.getObservationReviewStats(selectedId)])
+      .then(([mine, summary]) => {
+        if (current !== requestId.current) return;
+        setSaved(mine); setStats(summary);
+        if (mine) { setClassification(mine.classification); setConfidence(mine.confidence); setFlags(mine.flags); setNote(mine.note); }
+      })
+      .catch(() => { if (current === requestId.current) setReviewError("Review storage is unavailable. Your answer has not been saved."); })
+      .finally(() => { if (current === requestId.current) setReviewLoading(false); });
+    return () => { requestId.current++; };
+  }, [selectedId]);
 
-      // Refresh community stats
-      const updatedStats = await api.getReviewStats(item.comparisonId);
-      setStats(updatedStats);
-    } catch (err: any) {
-      alert("Failed to submit review: " + (err.message || "Error"));
-    } finally {
-      setSubmitting(false);
-    }
+  const selected = observations.find(observation => observation.id === selectedId) ?? null;
+  const regionNames = useMemo(() => new Map(regions.map(region => [region.id, region.name])), [regions]);
+  const visibleObservations = observations.filter(observation => fieldFilter === "all" || observation.region_id === fieldFilter);
+  const toggleFlag = (flag: ObservationReviewFlag) => setFlags(previous => previous.includes(flag) ? previous.filter(value => value !== flag) : [...previous, flag]);
+  const save = async () => {
+    if (!selected || !classification || saving || reviewLoading) return;
+    setSaving(true); setReviewError(null);
+    try {
+      const review = await api.saveObservationReview({observationId:selected.id,classification,confidence,flags,note:note.trim()},visitor.current);
+      setSaved(review);
+      const refreshedStats = await api.getObservationReviewStats(selected.id).catch(() => null);
+      if (refreshedStats) setStats(refreshedStats);
+    } catch { setReviewError("Your review could not be saved. Please try again; no confirmation has been recorded."); }
+    finally { setSaving(false); }
   };
 
-  if (error) {
-    return (
-      <ErrorState
-        title="Review data unavailable"
-        message={error}
-        onRetry={loadNextItem}
-      />
-    );
-  }
+  return <div className="observation-review-page">
+    <section className="observation-review-hero" aria-label="Citizen review introduction">
+      <div className="observation-review-hero-copy"><span className="mission-eyebrow">CHRONO & SPATIAL / CITIZEN REVIEW</span><h1>Look closely at the real sky.</h1><p>Inspect a SPHEREx observation, record what you can see, and save your assessment for later analysis. Each review stays attached to its exact archive image.</p><div className="observation-review-hero-facts"><span>Real SPHEREx cutouts</span><span>One review per image</span><span>Editable after saving</span></div></div>
+      <CosmicWebScene/>
+    </section>
 
-  return (
-    <div className="flex flex-col gap-8 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-md">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <RiEyeLine className="text-purple-400 w-5 h-5" />
-            <h1 className="text-xl font-bold text-white tracking-tight">
-              {t("reviewHeading")}
-            </h1>
-          </div>
-          <p className="text-xs text-slate-400">
-            {t("reviewSub")}
-          </p>
-        </div>
+    <div className="observation-review-heading"><div><span>THE REVIEW DESK</span><h2>Choose an observation. Record the evidence.</h2></div><p>These are individual images. A single image cannot establish motion or a change between dates.</p></div>
+    {loadError ? <div className="observation-review-error" role="alert">{loadError}<button type="button" onClick={loadArchive}>Retry</button></div> : loading ? <Skeleton className="h-[600px] rounded-2xl"/> : selected ? <div className="observation-review-workspace">
+      <aside className="observation-review-picker"><div className="review-desk-label">01 / SELECT IMAGE <strong>{observations.length} cutouts</strong></div><label className="observation-review-field">Sky field<select value={fieldFilter} onChange={event=>setFieldFilter(event.target.value)}><option value="all">All fields</option>{regions.filter(region=>observations.some(item=>item.region_id===region.id)).map(region=><option key={region.id} value={region.id}>{region.name}</option>)}</select></label><div className="observation-review-list" role="group" aria-label="Available observations">{visibleObservations.map(observation=><button type="button" key={observation.id} aria-pressed={observation.id===selected.id} onClick={()=>setSelectedId(observation.id)}><SkyImage observationId={observation.id} alt="" className="observation-review-thumb"/><span><strong>{regionNames.get(observation.region_id ?? "") ?? "Sky field"}</strong><small>{dateLabel(observation.observation_date)} · D{observation.band_number}</small></span></button>)}</div></aside>
 
-        <div className="flex items-center gap-2 text-xs text-slate-300 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 font-mono">
-          <RiShieldCheckLine className="text-emerald-400 w-4 h-4" />
-          <span>{t("privacyBadge")}</span>
-        </div>
-      </div>
+      <section className="observation-review-image"><div className="observation-review-image-head"><div><span className="review-desk-label">02 / INSPECT</span><h2>{regionNames.get(selected.region_id ?? "") ?? "SPHEREx sky field"}</h2></div><span className="observation-review-band">Detector {selected.band_number}</span></div><SkyImageViewer key={selected.id} observationId={selected.id} alt={`SPHEREx observation ${selected.archive_id}`} className="observation-review-viewer"/><dl className="observation-review-metadata"><div><dt>Observed UTC</dt><dd>{dateLabel(selected.observation_date)}</dd></div><div><dt>Wavelength</dt><dd>{selected.wavelength_min_um.toFixed(2)}–{selected.wavelength_max_um.toFixed(2)} µm</dd></div><div><dt>Center</dt><dd>RA {selected.ra.toFixed(3)}° / Dec {selected.dec.toFixed(3)}°</dd></div><div><dt>Archive ID</dt><dd>{selected.archive_id}</dd></div></dl>{selected.archive_url && <a className="observation-review-source" href={selected.archive_url} target="_blank" rel="noreferrer">View source at NASA/IPAC IRSA <RiArrowRightUpLine/></a>}</section>
 
-      {/* Beginner Guide Explainer */}
-      <BeginnerExplainer
-        pageTitle={t("citizenReviewTitle")}
-        pagePurpose={t("citizenReviewDesc")}
-        items={[
-          {
-            icon: <RiSparklingLine className="w-4 h-4 text-amber-400" />,
-            term: t("transientTitle"),
-            definition: t("differenceDesc"),
-          },
-          {
-            icon: <RiCompass3Line className="w-4 h-4 text-cyan-400" />,
-            term: t("movingObjectTitle"),
-            definition: t("swipeDesc"),
-          },
-          {
-            icon: <RiContrast2Line className="w-4 h-4 text-purple-400" />,
-            term: t("variableStarTitle"),
-            definition: t("blinkDesc"),
-          },
-          {
-            icon: <RiAlertLine className="w-4 h-4 text-rose-400" />,
-            term: t("artifactTitle"),
-            definition: t("significanceDesc"),
-          },
-        ]}
-      />
-
-      {/* Main Review Stage */}
-      {loading ? (
-        <Skeleton className="w-full h-[500px] rounded-3xl" />
-      ) : item ? (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left: Visual Viewer */}
-          <div className="lg:col-span-7">
-            <ReviewCard item={item} />
-          </div>
-
-          {/* Right: Classification Controls & Community Stats */}
-          <div className="lg:col-span-5 flex flex-col gap-6">
-            <ReviewActions
-              onSubmit={handleSubmitReview}
-              onNext={loadNextItem}
-              submitting={submitting}
-            />
-
-            {/* Community Stats */}
-            {stats && stats.totalReviews > 0 && (
-              <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 font-semibold text-slate-200">
-                    <RiCommunityLine className="text-sky-400" />
-                    <span>{t("communityStats")}</span>
-                  </div>
-                  <span className="font-mono text-slate-400">
-                    {stats.totalReviews} {stats.totalReviews === 1 ? "review" : "reviews"}
-                  </span>
-                </div>
-
-                <div className="space-y-1.5">
-                  {Object.entries(stats.classifications).map(([key, count]) => {
-                    const percentage = Math.round((count / stats.totalReviews) * 100);
-                    return (
-                      <div key={key} className="space-y-0.5">
-                        <div className="flex justify-between text-[11px] text-slate-300">
-                          <span>{key}</span>
-                          <span className="font-mono text-slate-400">{count} ({percentage}%)</span>
-                        </div>
-                        <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-sky-500 rounded-full"
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="p-12 text-center text-slate-400 bg-slate-900/40 rounded-3xl border border-slate-800">
-          No candidates currently queued for review. Check back soon!
-        </div>
-      )}
-    </div>
-  );
+      <section className="observation-review-form" aria-label="Observation review form"><span className="review-desk-label">03 / RECORD YOUR ASSESSMENT</span><h2>What do you see?</h2><p>Describe this image only. Your assessment helps prioritize later checks; it is not a confirmed discovery.</p>{reviewLoading ? <Skeleton className="h-[240px] rounded-xl"/> : <><div className="observation-review-choices" role="group" aria-label="Image assessment">{classifications.map(option=><button type="button" key={option.value} aria-pressed={classification===option.value} onClick={()=>setClassification(option.value)}><strong>{option.title}</strong><small>{option.detail}</small></button>)}</div><fieldset className="observation-review-flags"><legend>Anything affecting the view? <span>Optional</span></legend>{flagOptions.map(option=><label key={option.value}><input type="checkbox" checked={flags.includes(option.value)} onChange={()=>toggleFlag(option.value)}/>{option.label}</label>)}</fieldset><label className="observation-review-confidence">How sure are you? <strong>{Math.round(confidence*100)}%</strong><input type="range" min="0.1" max="1" step="0.1" value={confidence} onChange={event=>setConfidence(Number(event.target.value))}/></label><label className="observation-review-note">Evidence note <span>Optional · {note.length}/1000</span><textarea value={note} maxLength={1000} onChange={event=>setNote(event.target.value)} placeholder="What in the image led to your choice? Avoid personal information." rows={3}/></label>{reviewError && <div className="observation-review-error" role="alert">{reviewError}</div>}{saved && <div className="observation-review-saved" role="status"><RiCheckLine/> Review saved for this image. You can update it.</div>}<button type="button" className="observation-review-submit" disabled={!classification || saving} onClick={save}>{saving ? "Saving…" : saved ? "Update saved review" : "Save review"}</button><p className="observation-review-privacy">A random browser ID is used to keep one editable review per image. Notes are stored with the review; please do not include personal information.</p></>}{stats && <div className="observation-review-stats"><strong>{stats.totalReviews} {stats.totalReviews===1 ? "review" : "reviews"} recorded for this image</strong><div>{classifications.map(option=><span key={option.value}>{option.title} <b>{stats.classifications[option.value] ?? 0}</b></span>)}</div></div>}</section>
+    </div> : <div className="mission-empty">No observation previews are available for review yet.</div>}
+  </div>;
 }

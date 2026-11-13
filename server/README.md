@@ -6,6 +6,7 @@ Express + Node.js 22 + MySQL (`mysql2/promise`) backend server for the SPHEREx S
 - **Direct SQL**: Clean MySQL access with connection pooling using `mysql2/promise`. No ORM or Prisma.
 - **Auto-Provisioning**: Automatically creates database `spherex_atlas` if missing on startup and applies schema migrations.
 - **Demo Data Seeding**: Automatically seeds real NASA/IPAC IRSA SPHEREx observations, comparisons, and featured regions.
+- **Local archive fallback**: In development, if MySQL cannot start, the API serves bundled NASA/IPAC observations and stores individual-observation reviews in `storage/observation-reviews.sqlite`. Maintainers can sign in to inspect archive status and storage or clean the cache. Existing comparison products remain viewable; new science jobs and change-candidate reviews require MySQL.
 - **Job Queue**: Transactionally queues and manages `FETCH_OBSERVATIONS` and `COMPARE_EPOCHS` jobs for the Python scientific worker.
 - **Security & Validation**: Helmet headers, Zod schema validation, sliding-window rate limiting, and hashed admin sessions.
 

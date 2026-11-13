@@ -34,15 +34,13 @@ export function SkyImageViewer({
   observationId,
   src,
   alt,
-  ra = 0,
-  dec = 0,
   candidates = [],
   className = "",
 }: SkyImageViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [cursorPos, setCursorPos] = useState<{ x: number; y: number; ra: number; dec: number } | null>(null);
+  const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const zoom = useViewerStore((s) => s.zoom);
@@ -54,22 +52,18 @@ export function SkyImageViewer({
   const crosshairEnabled = useViewerStore((s) => s.crosshairEnabled);
   const setCrosshairEnabled = useViewerStore((s) => s.setCrosshairEnabled);
 
-  // Wheel zoom
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.2 : 0.2;
-    setZoom((prev) => Math.min(8, Math.max(0.8, prev + delta)));
-  };
+  useEffect(() => { resetView(); }, [observationId, src, resetView]);
 
   // Drag pan
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = (e: React.PointerEvent) => {
+    if ((e.target as HTMLElement).closest("button, input, a")) return;
     if (e.button !== 0) return; // Left click only
     setIsDragging(true);
     setDragStart({ x: e.clientX - panX, y: e.clientY - panY });
   };
 
   const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
+    (e: React.PointerEvent) => {
       if (isDragging) {
         setPan(e.clientX - dragStart.x, e.clientY - dragStart.y);
       }
@@ -79,19 +73,13 @@ export function SkyImageViewer({
         const normX = ((e.clientX - rect.left) / rect.width) * 100;
         const normY = ((e.clientY - rect.top) / rect.height) * 100;
 
-        // Approximate RA/Dec offset from center based on 0.25 deg field
-        const offsetRa = ((normX - 50) / 100) * 0.25;
-        const offsetDec = ((50 - normY) / 100) * 0.25;
-
         setCursorPos({
           x: normX,
           y: normY,
-          ra: Number((ra + offsetRa).toFixed(4)),
-          dec: Number((dec + offsetDec).toFixed(4)),
         });
       }
     },
-    [isDragging, dragStart, setPan, ra, dec]
+    [isDragging, dragStart, setPan]
   );
 
   const handleMouseUp = () => {
@@ -118,18 +106,19 @@ export function SkyImageViewer({
   return (
     <div
       ref={containerRef}
-      onWheel={handleWheel}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={() => {
+      data-sky-viewer="true"
+      onPointerDown={handleMouseDown}
+      onPointerMove={handleMouseMove}
+      onPointerUp={handleMouseUp}
+      onPointerCancel={handleMouseUp}
+      onPointerLeave={() => {
         setIsDragging(false);
         setCursorPos(null);
       }}
       className={`relative overflow-hidden rounded-2xl bg-black border border-slate-800 shadow-2xl select-none group ${
         isDragging ? "cursor-grabbing" : "cursor-crosshair"
       } ${className}`}
-      style={{ minHeight: "420px" }}
+      style={{ minHeight: "320px", touchAction: zoom > 1 ? "none" : "pan-y" }}
     >
       {/* Sky Image Layer with pan & zoom transform */}
       <div
@@ -168,24 +157,8 @@ export function SkyImageViewer({
         <Crosshair
           x={cursorPos.x}
           y={cursorPos.y}
-          ra={cursorPos.ra}
-          dec={cursorPos.dec}
         />
       )}
-
-      {/* Top Header Information Overlay */}
-      <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-30">
-        <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-slate-800 text-[11px] font-mono text-slate-300 shadow-md">
-          <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
-          <span>Center: RA {ra.toFixed(4)}° / Dec {dec >= 0 ? `+${dec.toFixed(4)}` : dec.toFixed(4)}°</span>
-        </div>
-
-        {cursorPos && (
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-slate-800 text-[11px] font-mono text-cyan-300 shadow-md">
-            <span>Cursor: {cursorPos.ra.toFixed(4)}°, {cursorPos.dec >= 0 ? `+${cursorPos.dec.toFixed(4)}` : cursorPos.dec.toFixed(4)}°</span>
-          </div>
-        )}
-      </div>
 
       {/* Floating Control Toolbar */}
       <div className="absolute bottom-4 right-4 flex items-center gap-1.5 p-1.5 rounded-xl bg-slate-950/80 backdrop-blur-md border border-slate-800 shadow-xl z-30">
